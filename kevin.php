@@ -55,7 +55,7 @@ class Kevin extends PaymentModule
         parent::__construct();
 
         $this->displayName = $this->l('kevin.');
-        $this->description = $this->l('kevin. provides a platform that connects all financial market players.');
+        $this->description = $this->l('kevin. is a payment infrastructure company which offers payment initiation service in EU&EEA.');
 
         $this->confirmUninstall = $this->l('Are you sure you would like to uninstall?');
 

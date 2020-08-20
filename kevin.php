@@ -153,7 +153,7 @@ class Kevin extends PaymentModule
     public function getContent()
     {
         $is_submit = false;
-        $buttons = ['submitKevinModule1', 'submitKevinModule2'];
+        $buttons = ['submitKevinModule1', 'submitKevinModule2', 'submitKevinModule3'];
         foreach ($buttons as $button) {
             if ((boolval(Tools::isSubmit($button))) === true) {
                 $is_submit = true;
@@ -251,6 +251,40 @@ class Kevin extends PaymentModule
             ),
         );
 
+        $settings_form = array(
+            'form' => array(
+                'legend' => array(
+                    'title' => $this->l('Settings'),
+                    'icon' => 'icon-cogs',
+                ),
+                'input' => array(
+                    array(
+                        'col' => 6,
+                        'type' => 'switch',
+                        'label' => $this->l('Redirect Preferred'),
+                        'name' => 'KEVIN_REDIRECT_PREFERRED',
+                        'desc' => $this->l('Redirect user directly to bank.'),
+                        'values' => array(
+                            array(
+                                'id' => 'active_on',
+                                'value' => 1,
+                                'label' => $this->l('Enabled')
+                            ),
+                            array(
+                                'id' => 'active_off',
+                                'value' => 0,
+                                'label' => $this->l('Disabled')
+                            )
+                        ),
+                    ),
+                ),
+                'submit' => array(
+                    'title' => $this->l('Save'),
+                    'name' => 'submitKevinModule3',
+                ),
+            ),
+        );
+
         $helper = new HelperForm();
 
         $helper->show_toolbar = false;
@@ -271,7 +305,7 @@ class Kevin extends PaymentModule
             'id_language' => $this->context->language->id,
         );
 
-        return $helper->generateForm(array($client_form, $creditor_form));
+        return $helper->generateForm(array($client_form, $creditor_form, $settings_form));
     }
 
     /**
@@ -281,11 +315,17 @@ class Kevin extends PaymentModule
      */
     protected function getConfigFormValues()
     {
+        $redirectPreferred = Tools::getValue('KEVIN_REDIRECT_PREFERRED', Configuration::get('KEVIN_REDIRECT_PREFERRED'));
+        if ($redirectPreferred === false) {
+            $redirectPreferred = 1;
+        }
+
         return array(
             'KEVIN_CLIENT_ID' => Tools::getValue('KEVIN_CLIENT_ID', Configuration::get('KEVIN_CLIENT_ID')),
             'KEVIN_CLIENT_SECRET' => Tools::getValue('KEVIN_CLIENT_SECRET', Configuration::get('KEVIN_CLIENT_SECRET')),
             'KEVIN_CREDITOR_NAME' => Tools::getValue('KEVIN_CREDITOR_NAME', Configuration::get('KEVIN_CREDITOR_NAME')),
             'KEVIN_CREDITOR_ACCOUNT' => Tools::getValue('KEVIN_CREDITOR_ACCOUNT', Configuration::get('KEVIN_CREDITOR_ACCOUNT')),
+            'KEVIN_REDIRECT_PREFERRED' => $redirectPreferred,
         );
     }
 

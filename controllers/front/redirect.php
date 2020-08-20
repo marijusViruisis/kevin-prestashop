@@ -53,7 +53,13 @@ class KevinRedirectModuleFrontController extends ModuleFrontController
         $creditor_name = $this->module->creditorName;
         $creditor_account = $this->module->creditorAccount;
 
+        $redirect_preferred = Configuration::get('KEVIN_REDIRECT_PREFERRED');
+        if ($redirect_preferred === false) {
+            $redirect_preferred = 1;
+        }
+
         $attr = [
+            'redirectPreferred' => boolval($redirect_preferred),
             'Redirect-URL' => $this->context->link->getModuleLink('kevin', 'confirm', array(), true),
             'Webhook-URL' => $this->context->link->getModuleLink('kevin', 'webhook', array(), true),
             'endToEndId' => strval($order_id),

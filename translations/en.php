@@ -28,4 +28,3 @@ $_MODULE['<{kevin}prestashop>kevin_efc9732522e9b2e2718488950ef95e2b'] = 'Payment
 $_MODULE['<{kevin}prestashop>kevin_3e984424a2dcd938412cace671b40e59'] = 'Payment Pending';
 $_MODULE['<{kevin}prestashop>kevin_66e59abdb49ba901e35c4950ac216347'] = 'Payment Completed';
 $_MODULE['<{kevin}prestashop>kevin_952b6559aa617beb13b98a54917c728f'] = 'Payment Failed';
-$_MODULE['<{kevin}prestashop>payment_970d2132c1100ebc99bf63a59f5056d0'] = 'Redirect to bank login';

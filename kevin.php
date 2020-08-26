@@ -17,6 +17,8 @@
 *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
 */
 
+use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -45,8 +47,8 @@ class Kevin extends PaymentModule
     {
         $this->name = 'kevin';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.1';
-        $this->ps_versions_compliancy = array('min' => '1.6', 'max' => '1.6');
+        $this->version = '1.7.0';
+        $this->ps_versions_compliancy = array('min' => '1.7', 'max' => '1.7');
         $this->author = 'Tammi';
         $this->controllers = array('redirect', 'confirm', 'webhook');
         $this->need_instance = 0;
@@ -109,10 +111,7 @@ class Kevin extends PaymentModule
             $this->addOrderStatus($status_key, $status_config);
         }
 
-        return parent::install() &&
-            $this->registerHook('header') &&
-            $this->registerHook('backOfficeHeader') &&
-            $this->registerHook('payment');
+        return parent::install() && $this->registerHook('paymentOptions');
     }
 
     /**
@@ -137,10 +136,7 @@ class Kevin extends PaymentModule
 
         include(dirname(__FILE__) . '/sql/uninstall.php');
 
-        return parent::uninstall()
-            && $this->unregisterHook('header')
-            && $this->unregisterHook('backOfficeHeader')
-            && $this->unregisterHook('payment');
+        return parent::uninstall() && $this->unregisterHook('paymentOptions');
     }
 
 
@@ -177,6 +173,8 @@ class Kevin extends PaymentModule
         if (isset($this->_warning) && !count($this->_postErrors) && $is_submit === false) {
             $this->_html .= $this->displayError($this->_warning);
         }
+
+        $this->context->controller->addCSS($this->_path . '/views/css/back.css');
 
         $this->context->smarty->assign('module_dir', $this->_path);
 
@@ -362,63 +360,41 @@ class Kevin extends PaymentModule
     }
 
     /**
-     * Hook files for frontend.
-     */
-    public function hookHeader()
-    {
-        $this->context->controller->addCSS($this->_path . '/views/css/front.css');
-    }
-
-    /**
-     * Hook files for frontend.
-     */
-    public function hookBackOfficeHeader()
-    {
-        if (Tools::getValue('module_name') == $this->name) {
-            $this->context->controller->addCSS($this->_path . '/views/css/back.css');
-        }
-    }
-
-    /**
-     * Display payment buttons.
+     * Return payment options.
      *
-     * @param $params
-     * @return bool|string
+     * @param array
+     * @return array|null
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
-    public function hookPayment($params)
+    public function hookPaymentOptions($params)
     {
-        $currency_id = $params['cart']->id_currency;
-        $currency = new Currency((int)$currency_id);
+        if (!$this->active) {
 
-        if (in_array($currency->iso_code, $this->limited_currencies) == false) {
+            return null;
+        }
 
-            return false;
+        if (!$this->validateCurrency($params['cart'])) {
+
+            return null;
         }
 
         if (!$this->validateClientCredentials()) {
 
-            return false;
+            return null;
         }
 
-        $banks = [];
+        $options = [];
         $bank_data = $this->getBanks();
         foreach ($bank_data as $bank_datum) {
-            $banks[] = [
-                'id' => $bank_datum['id'],
-                'title' => $bank_datum['name'],
-                'logo' => $bank_datum['imageUri'],
-                'action' => $this->context->link->getModuleLink($this->name, 'redirect', array('id' => $bank_datum['id']), true),
-            ];
+            $option = new PaymentOption();
+            $option->setModuleName($this->name);
+            $option->setCallToActionText($bank_datum['name']);
+            $option->setAction($this->context->link->getModuleLink($this->name, 'redirect', array('id' => $bank_datum['id']), true));
+            $options[] = $option;
         }
 
-        $this->smarty->assign(array(
-            'banks' => $banks,
-            'module_dir' => $this->_path,
-        ));
-
-        return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
+        return $options;
     }
 
     /**
@@ -544,6 +520,25 @@ class Kevin extends PaymentModule
     public function validateClientCredentials()
     {
         if (empty($this->clientId) || empty($this->clientSecret) || empty($this->creditorName) || empty($this->creditorAccount)) {
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Validate cart currency.
+     *
+     * @param $cart
+     * @return bool
+     */
+    public function validateCurrency($cart)
+    {
+        $currency_id = $cart->id_currency;
+        $currency = new Currency((int)$currency_id);
+
+        if (in_array($currency->iso_code, $this->limited_currencies) == false) {
 
             return false;
         }

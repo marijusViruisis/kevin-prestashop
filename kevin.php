@@ -12,7 +12,7 @@
 * obtain it through the world-wide-web, please send an email
 * to license@prestashop.com so we can send you a copy immediately.
 *
-*  @author 2020 Tammi <info@tammi.lt>
+*  @author 2020 kevin. <info@getkevin.eu>
 *  @copyright kevin.
 *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
 */
@@ -49,7 +49,7 @@ class Kevin extends PaymentModule
         $this->tab = 'payments_gateways';
         $this->version = '1.7.0';
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => '1.7');
-        $this->author = 'Tammi';
+        $this->author = 'kevin.';
         $this->controllers = array('redirect', 'confirm', 'webhook');
         $this->need_instance = 0;
 

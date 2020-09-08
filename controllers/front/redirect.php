@@ -63,7 +63,7 @@ class KevinRedirectModuleFrontController extends ModuleFrontController
             'Redirect-URL' => $this->context->link->getModuleLink('kevin', 'confirm', array(), true),
             'Webhook-URL' => $this->context->link->getModuleLink('kevin', 'webhook', array(), true),
             'endToEndId' => strval($order_id),
-            'informationUnstructured' => sprintf($this->module->l('Order #%s'), $order_id),
+            'informationUnstructured' => sprintf($this->module->l('Order') . ' %s', $order_id),
             'currencyCode' => $currency->iso_code,
             'amount' => number_format($cart->getOrderTotal(), 2, '.', ''),
             'creditorName' => $creditor_name,

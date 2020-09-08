@@ -47,7 +47,7 @@ class Kevin extends PaymentModule
     {
         $this->name = 'kevin';
         $this->tab = 'payments_gateways';
-        $this->version = '1.7.0';
+        $this->version = '1.7.1';
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => '1.7');
         $this->author = 'kevin.';
         $this->controllers = array('redirect', 'confirm', 'webhook');
@@ -83,7 +83,7 @@ class Kevin extends PaymentModule
             $this->creditorAccount = $config['KEVIN_CREDITOR_ACCOUNT'];
         }
         if (!$this->_warning && (!isset($this->creditorName) || !isset($this->creditorAccount))) {
-            $this->_warning = $this->l('Creditor Name and Creditor Account must be configured before using this module.');
+            $this->_warning = $this->l('Company Name and Company Bank Account must be configured before using this module.');
         }
     }
 
@@ -223,21 +223,21 @@ class Kevin extends PaymentModule
         $creditor_form = array(
             'form' => array(
                 'legend' => array(
-                    'title' => $this->l('Creditor Details'),
+                    'title' => $this->l('Company Details'),
                     'icon' => 'icon-user',
                 ),
                 'input' => array(
                     array(
                         'col' => 6,
                         'type' => 'text',
-                        'label' => $this->l('Creditor Name'),
+                        'label' => $this->l('Company Name'),
                         'name' => 'KEVIN_CREDITOR_NAME',
                         'required' => true,
                     ),
                     array(
                         'col' => 6,
                         'type' => 'text',
-                        'label' => $this->l('Creditor Account'),
+                        'label' => $this->l('Company Bank Account'),
                         'name' => 'KEVIN_CREDITOR_ACCOUNT',
                         'required' => true,
                     ),
@@ -341,9 +341,9 @@ class Kevin extends PaymentModule
         }
         if (((bool)Tools::isSubmit('submitKevinModule2')) === true) {
             if (!Tools::getValue('KEVIN_CREDITOR_NAME')) {
-                $this->_postErrors[] = $this->l('Creditor Name is required.');
+                $this->_postErrors[] = $this->l('Company Name is required.');
             } elseif (!Tools::getValue('KEVIN_CREDITOR_ACCOUNT')) {
-                $this->_postErrors[] = $this->l('Creditor Account is required.');
+                $this->_postErrors[] = $this->l('Company Bank Account is required.');
             }
         }
     }

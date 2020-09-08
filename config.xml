@@ -2,7 +2,7 @@
 <module>
 	<name>kevin</name>
 	<displayName><![CDATA[kevin.]]></displayName>
-	<version><![CDATA[1.6.0]]></version>
+	<version><![CDATA[1.6.1]]></version>
 	<description><![CDATA[kevin. is a payment infrastructure company which offers payment initiation service in EU&EEA.]]></description>
 	<author><![CDATA[kevin.]]></author>
 	<tab><![CDATA[payments_gateways]]></tab>

@@ -45,7 +45,7 @@ class Kevin extends PaymentModule
     {
         $this->name = 'kevin';
         $this->tab = 'payments_gateways';
-        $this->version = '1.6.1';
+        $this->version = '1.6.2';
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => '1.6');
         $this->author = 'kevin.';
         $this->controllers = array('redirect', 'confirm', 'webhook');
@@ -465,6 +465,7 @@ class Kevin extends PaymentModule
     {
         return array(
             'KEVIN_ORDER_STATUS_STARTED' => array(
+                'send_email' => false,
                 'name' => $this->l('Payment Started'),
                 'color' => 'Lavender',
                 'paid' => false,

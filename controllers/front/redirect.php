@@ -84,6 +84,10 @@ class KevinRedirectModuleFrontController extends ModuleFrontController
             'ip_address' => pSQL(Tools::getRemoteAddr()),
         ));
 
+        $lang = $this->context->language->iso_code;
+        $query = parse_url($response['confirmLink'], PHP_URL_QUERY);
+        $response['confirmLink'] .= ($query) ? '&lang=' . $lang : '?lang=' . $lang;
+
         return Tools::redirect($response['confirmLink']);
     }
 

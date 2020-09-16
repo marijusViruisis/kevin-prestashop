@@ -28,9 +28,19 @@ class KevinWebhookModuleFrontController extends ModuleFrontController
             die();
         }
 
-        $payment_id = Tools::getValue('id');
-        $payment_status = Tools::getValue('status');
-        $payment_status_group = Tools::getValue('statusGroup');
+        $request_body  = file_get_contents('php://input');
+        $request_array = json_decode($request_body, true);
+
+        if (is_array($request_array)) {
+            $payment_id = empty($request_array['id']) ? null : $request_array['id'];
+            $payment_status = empty($request_array['status']) ? null : $request_array['status'];
+            $payment_status_group = empty($request_array['statusGroup']) ? null : $request_array['statusGroup'];
+        } else {
+            $payment_id = Tools::getValue('id');
+            $payment_status = Tools::getValue('status');
+            $payment_status_group = Tools::getValue('statusGroup');
+        }
+
         if (!$payment_id || !$payment_status || !$payment_status_group) {
             die();
         }
@@ -48,28 +58,31 @@ class KevinWebhookModuleFrontController extends ModuleFrontController
                 die();
             }
 
-            switch ($payment_status_group) {
-                case 'started':
-                    $new_os_id = Configuration::get('KEVIN_ORDER_STATUS_STARTED');
-                    break;
-                case 'pending':
-                    $new_os_id = Configuration::get('KEVIN_ORDER_STATUS_PENDING');
-                    break;
-                case 'completed':
-                    $new_os_id = Configuration::get('KEVIN_ORDER_STATUS_COMPLETED');
-                    break;
-                case 'failed':
-                    $new_os_id = Configuration::get('KEVIN_ORDER_STATUS_FAILED');
-                    break;
-                default:
-                    $new_os_id = null;
+            $os_started = Configuration::get('KEVIN_ORDER_STATUS_STARTED');
+            $os_pending = Configuration::get('KEVIN_ORDER_STATUS_PENDING');
+            $os_completed = Configuration::get('KEVIN_ORDER_STATUS_COMPLETED');
+            $os_failed = Configuration::get('KEVIN_ORDER_STATUS_FAILED');
+
+            $old_os_id = $order->getCurrentOrderState()->id;
+            $new_os_id = null;
+
+            if (in_array($old_os_id, array($os_started, $os_pending))) {
+                switch ($payment_status_group) {
+                    case 'completed':
+                        $new_os_id = $os_completed;
+                        break;
+                    case 'failed':
+                        $new_os_id = $os_failed;
+                        break;
+                    default:
+                        $new_os_id = null;
+                }
             }
 
             if (!$new_os_id) {
                 die();
             }
 
-            $old_os_id = $order->getCurrentOrderState()->id;
             if ($old_os_id != $new_os_id) {
                 $order->setCurrentState($new_os_id);
             }

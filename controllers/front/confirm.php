@@ -51,34 +51,36 @@ class KevinConfirmModuleFrontController extends ModuleFrontController
                 $kevinPayment = $this->module->getClient()->payment();
                 $response = $kevinPayment->getPaymentStatus($row['payment_id'], array('PSU-IP-Address' => $row['ip_address']));
 
-                switch ($response['group']) {
-                    case 'started':
-                        $new_os_id = Configuration::get('KEVIN_ORDER_STATUS_STARTED');
-                        break;
-                    case 'pending':
-                        $new_os_id = Configuration::get('KEVIN_ORDER_STATUS_PENDING');
-                        break;
-                    case 'completed':
-                        $new_os_id = Configuration::get('KEVIN_ORDER_STATUS_COMPLETED');
-                        break;
-                    case 'failed':
-                        $new_os_id = Configuration::get('KEVIN_ORDER_STATUS_FAILED');
-                        break;
-                    default:
-                        $new_os_id = null;
+                $os_started = Configuration::get('KEVIN_ORDER_STATUS_STARTED');
+                $os_pending = Configuration::get('KEVIN_ORDER_STATUS_PENDING');
+                $os_completed = Configuration::get('KEVIN_ORDER_STATUS_COMPLETED');
+                $os_failed = Configuration::get('KEVIN_ORDER_STATUS_FAILED');
+
+                $old_os_id = $order->getCurrentOrderState()->id;
+                $new_os_id = null;
+
+                if (in_array($old_os_id, array($os_completed))) {
+                    $params = array('id_order' => $order->id, 'key' => $customer->secure_key);
+                    Tools::redirect($this->context->link->getPageLink('order-detail', null, null, $params));
+                }
+
+                if (in_array($old_os_id, array($os_started))) {
+                    if ($response['group'] === 'failed') {
+                        $new_os_id = $os_failed;
+                    } else {
+                        $new_os_id = $os_pending;
+                    }
                 }
 
                 if (!$new_os_id) {
                     Tools::redirect($this->context->link->getPageLink('order'));
                 }
 
-                $old_os_id = $order->getCurrentOrderState()->id;
                 if ($old_os_id != $new_os_id) {
                     $order->setCurrentState($new_os_id);
                 }
 
                 $params = array('id_order' => $order->id, 'key' => $customer->secure_key);
-
                 Tools::redirect($this->context->link->getPageLink('order-detail', null, null, $params));
             } catch (\Kevin\KevinException $e) {
 

@@ -59,11 +59,6 @@ class KevinConfirmModuleFrontController extends ModuleFrontController
                 $old_os_id = $order->getCurrentOrderState()->id;
                 $new_os_id = null;
 
-                if (in_array($old_os_id, array($os_completed))) {
-                    $params = array('id_order' => $order->id, 'key' => $customer->secure_key);
-                    Tools::redirect($this->context->link->getPageLink('order-detail', null, null, $params));
-                }
-
                 if (in_array($old_os_id, array($os_started))) {
                     if ($response['group'] === 'failed') {
                         $new_os_id = $os_failed;

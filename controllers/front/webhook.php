@@ -25,6 +25,7 @@ class KevinWebhookModuleFrontController extends ModuleFrontController
     public function postProcess()
     {
         if (!$this->module->active) {
+            header('HTTP/1.1 200 OK', true, 200);
             die();
         }
 
@@ -66,30 +67,53 @@ class KevinWebhookModuleFrontController extends ModuleFrontController
             $old_os_id = $order->getCurrentOrderState()->id;
             $new_os_id = null;
 
-            if (in_array($old_os_id, array($os_started, $os_pending))) {
+            // Re-queue webhook for later (user did not return from payment platform).
+            if (in_array($old_os_id, array($os_started))) {
+                header('HTTP/1.1 400 Bad Request', true, 400);
+                die();
+            }
+
+            // Ignore already completed or failed orders.
+            if (in_array($old_os_id, array($os_completed, $os_failed))) {
+                header('HTTP/1.1 200 OK', true, 200);
+                die();
+            }
+
+            // Process only pending payments.
+            if (in_array($old_os_id, array($os_pending))) {
                 switch ($payment_status_group) {
                     case 'completed':
+                        // Payment completed.
                         $new_os_id = $os_completed;
                         break;
                     case 'failed':
+                        // Payment failed.
                         $new_os_id = $os_failed;
                         break;
                     default:
                         $new_os_id = null;
                 }
-            }
 
-            if (!$new_os_id) {
-                die();
-            }
+                if (!$new_os_id) {
+                    // Unhandled case. Should not happen.
+                    header('HTTP/1.1 200 OK', true, 200);
+                    die();
+                }
 
-            if ($old_os_id != $new_os_id) {
                 $order->setCurrentState($new_os_id);
+
+                // All is OK.
+                header('HTTP/1.1 200 OK', true, 200);
+                exit();
             }
 
-            exit();
+            // Payment status did not match any cases.
+            header('HTTP/1.1 400 Bad Request', true, 400);
+            die();
         }
 
-        die();
+        // Payment id was not found or cancelled by user (replaced by new payment id).
+        header('HTTP/1.1 200 OK', true, 200);
+        exit();
     }
 }

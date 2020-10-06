@@ -67,10 +67,27 @@ class KevinWebhookModuleFrontController extends ModuleFrontController
             $old_os_id = $order->getCurrentOrderState()->id;
             $new_os_id = null;
 
-            // Re-queue webhook for later (user did not return from payment platform).
+            // Payment process is still starting.
             if (in_array($old_os_id, array($os_started))) {
-                header('HTTP/1.1 400 Bad Request', true, 400);
-                die();
+                // Waiting time.
+                $minutes = 15;
+                // User never returned from the payment platform and certain amount of time has passed.
+                if ((time() - strtotime($order->date_add)) > ($minutes * 60)) {
+                    // Fill in missing statuses.
+                    $order->setCurrentState($os_pending);
+
+                    // Reset order data.
+                    $order = new Order($row['id_order']);
+                    if (!Validate::isLoadedObject($order)) {
+                        die();
+                    }
+
+                    $old_os_id = $order->getCurrentOrderState()->id;
+                } else {
+                    // Re-queue webhook for later (user did not return from payment platform).
+                    header('HTTP/1.1 400 Bad Request', true, 400);
+                    die();
+                }
             }
 
             // Ignore already completed or failed orders.
@@ -81,18 +98,8 @@ class KevinWebhookModuleFrontController extends ModuleFrontController
 
             // Process only pending payments.
             if (in_array($old_os_id, array($os_pending))) {
-                switch ($payment_status_group) {
-                    case 'completed':
-                        // Payment completed.
-                        $new_os_id = $os_completed;
-                        break;
-                    case 'failed':
-                        // Payment failed.
-                        $new_os_id = $os_failed;
-                        break;
-                    default:
-                        $new_os_id = null;
-                }
+                // Check returned payment status.
+                $new_os_id = $this->isPaymentCompletedOrFailed($payment_status_group);
 
                 if (!$new_os_id) {
                     // Unhandled case. Should not happen.
@@ -115,5 +122,22 @@ class KevinWebhookModuleFrontController extends ModuleFrontController
         // Payment id was not found or cancelled by user (replaced by new payment id).
         header('HTTP/1.1 200 OK', true, 200);
         exit();
+    }
+
+    protected function isPaymentCompletedOrFailed($payment_status_group = '') {
+        switch ($payment_status_group) {
+            case 'completed':
+                // Payment completed.
+                $new_os_id = Configuration::get('KEVIN_ORDER_STATUS_COMPLETED');
+                break;
+            case 'failed':
+                // Payment failed.
+                $new_os_id = Configuration::get('KEVIN_ORDER_STATUS_FAILED');
+                break;
+            default:
+                $new_os_id = null;
+        }
+
+        return $new_os_id;
     }
 }

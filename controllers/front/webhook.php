@@ -70,7 +70,7 @@ class KevinWebhookModuleFrontController extends ModuleFrontController
             // Payment process is still starting.
             if (in_array($old_os_id, array($os_started))) {
                 // Waiting time.
-                $minutes = 15;
+                $minutes = 10;
                 // User never returned from the payment platform and certain amount of time has passed.
                 if ((time() - strtotime($order->date_add)) > ($minutes * 60)) {
                     // Fill in missing statuses.

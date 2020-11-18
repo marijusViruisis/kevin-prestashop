@@ -75,8 +75,13 @@ class KevinConfirmModuleFrontController extends ModuleFrontController
                     $order->setCurrentState($new_os_id);
                 }
 
-                $params = array('id_order' => $order->id, 'key' => $customer->secure_key);
-                Tools::redirect($this->context->link->getPageLink('order-detail', null, null, $params));
+                $params = array(
+                    'id_order' => $order->id,
+                    'id_module' => $this->module->id,
+                    'id_cart' => $order->id_cart,
+                    'key' => $customer->secure_key
+                );
+                Tools::redirect($this->context->link->getPageLink('order-confirmation', null, null, $params));
             } catch (\Kevin\KevinException $e) {
 
                 return $this->displayError($this->module->l('An error occurred. Please contact the merchant for more information.'));

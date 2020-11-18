@@ -45,7 +45,7 @@ class Kevin extends PaymentModule
     {
         $this->name = 'kevin';
         $this->tab = 'payments_gateways';
-        $this->version = '1.6.5';
+        $this->version = '1.6.8';
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => '1.6');
         $this->author = 'kevin.';
         $this->controllers = array('redirect', 'confirm', 'webhook');
@@ -109,10 +109,11 @@ class Kevin extends PaymentModule
             $this->addOrderStatus($status_key, $status_config);
         }
 
-        return parent::install() &&
-            $this->registerHook('header') &&
-            $this->registerHook('backOfficeHeader') &&
-            $this->registerHook('payment');
+        return parent::install()
+            && $this->registerHook('header')
+            && $this->registerHook('backOfficeHeader')
+            && $this->registerHook('payment')
+            && $this->registerHook('orderConfirmation');
     }
 
     /**
@@ -140,7 +141,8 @@ class Kevin extends PaymentModule
         return parent::uninstall()
             && $this->unregisterHook('header')
             && $this->unregisterHook('backOfficeHeader')
-            && $this->unregisterHook('payment');
+            && $this->unregisterHook('payment')
+            && $this->unregisterHook('orderConfirmation');
     }
 
 
@@ -419,6 +421,27 @@ class Kevin extends PaymentModule
         ));
 
         return $this->display(__FILE__, 'views/templates/hook/payment.tpl');
+    }
+
+    /**
+     * Display confirmation page.
+     *
+     * @param $params
+     * @return string
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
+    public function hookOrderConfirmation($params)
+    {
+        $order = $params['objOrder'];
+        $customer = new Customer($params['cookie']->id_customer);
+
+        $this->smarty->assign(array(
+            'id_order_formatted' => sprintf('#%06d', $order->id),
+            'email' => $customer->email
+        ));
+
+        return $this->display(__FILE__, 'views/templates/hook/order-confirmation.tpl');
     }
 
     /**

@@ -69,25 +69,11 @@ class KevinWebhookModuleFrontController extends ModuleFrontController
 
             // Payment process is still starting.
             if (in_array($old_os_id, array($os_started))) {
-                // Waiting time.
-                $minutes = 10;
-                // User never returned from the payment platform and certain amount of time has passed.
-                if ((time() - strtotime($order->date_add)) > ($minutes * 60)) {
-                    // Fill in missing statuses.
-                    $order->setCurrentState($os_pending);
+                // Fill in missing statuses.
+                $order->setCurrentState($os_pending);
 
-                    // Reset order data.
-                    $order = new Order($row['id_order']);
-                    if (!Validate::isLoadedObject($order)) {
-                        die();
-                    }
-
-                    $old_os_id = $order->getCurrentOrderState()->id;
-                } else {
-                    // Re-queue webhook for later (user did not return from payment platform).
-                    header('HTTP/1.1 400 Bad Request', true, 400);
-                    die();
-                }
+                // Set current payment status.
+                $old_os_id = $os_pending;
             }
 
             // Ignore already completed or failed orders.

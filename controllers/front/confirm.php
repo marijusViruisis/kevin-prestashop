@@ -56,6 +56,9 @@ class KevinConfirmModuleFrontController extends ModuleFrontController
                 $os_completed = Configuration::get('KEVIN_ORDER_STATUS_COMPLETED');
                 $os_failed = Configuration::get('KEVIN_ORDER_STATUS_FAILED');
 
+                // Refresh order data after API call
+                $order = new Order($row['id_order']);
+
                 $old_os_id = $order->getCurrentOrderState()->id;
                 $new_os_id = null;
 
@@ -67,12 +70,24 @@ class KevinConfirmModuleFrontController extends ModuleFrontController
                     }
                 }
 
-                if (!$new_os_id) {
+                if (!in_array($old_os_id, array($os_started, $os_pending, $os_completed, $os_failed))) {
                     Tools::redirect($this->context->link->getPageLink('order'));
                 }
 
-                if ($old_os_id != $new_os_id) {
-                    $order->setCurrentState($new_os_id);
+                if ($old_os_id !== $new_os_id) {
+                    // Payment statuses must follow correct order.
+                    switch ($old_os_id) {
+                        case $os_started:
+                            $order->setCurrentState($new_os_id);
+                            break;
+                        case $os_pending:
+                            if (in_array($new_os_id, array($os_completed, $os_failed))) {
+                                $order->setCurrentState($new_os_id);
+                            }
+                            break;
+                        default:
+                            // Do nothing. Webhook will take care of statuses.
+                    }
                 }
 
                 $params = array(

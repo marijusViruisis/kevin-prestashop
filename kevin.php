@@ -38,6 +38,7 @@ class Kevin extends PaymentModule
     public $clientSecret;
     public $creditorName;
     public $creditorAccount;
+    public $options;
 
     /**
      * Kevin constructor.
@@ -47,7 +48,7 @@ class Kevin extends PaymentModule
     {
         $this->name = 'kevin';
         $this->tab = 'payments_gateways';
-        $this->version = '1.7.8';
+        $this->version = '1.7.9';
         $this->ps_versions_compliancy = array('min' => '1.7', 'max' => '1.7');
         $this->author = 'kevin.';
         $this->controllers = array('redirect', 'confirm', 'webhook');
@@ -85,6 +86,8 @@ class Kevin extends PaymentModule
         if (!$this->_warning && (!isset($this->creditorName) || !isset($this->creditorAccount))) {
             $this->_warning = $this->l('Company Name and Company Bank Account must be configured before using this module.');
         }
+
+        $this->options = ['version' => '0.2'];
     }
 
     /**
@@ -405,7 +408,7 @@ class Kevin extends PaymentModule
      */
     public function getClient()
     {
-        return new \Kevin\Client($this->clientId, $this->clientSecret);
+        return new \Kevin\Client($this->clientId, $this->clientSecret,  $this->options);
     }
 
     /**

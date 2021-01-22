@@ -48,8 +48,15 @@ class KevinConfirmModuleFrontController extends ModuleFrontController
                     Tools::redirect($this->context->link->getPageLink('order'));
                 }
 
+                $attr = array(
+                    'PSU-IP-Address' => $row['ip_address'],
+                    'PSU-IP-Port' => $row['ip_port'],
+                    'PSU-User-Agent' => $row['user_agent'],
+                    'PSU-Device-ID' => $row['device_id'],
+                );
+
                 $kevinPayment = $this->module->getClient()->payment();
-                $response = $kevinPayment->getPaymentStatus($row['payment_id'], array('PSU-IP-Address' => $row['ip_address']));
+                $response = $kevinPayment->getPaymentStatus($row['payment_id'], $attr);
 
                 $os_started = Configuration::get('KEVIN_ORDER_STATUS_STARTED');
                 $os_pending = Configuration::get('KEVIN_ORDER_STATUS_PENDING');

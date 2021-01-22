@@ -24,6 +24,9 @@ $sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'kevin` (
     `id_order` int(11) UNSIGNED NOT NULL,
     `payment_id` varchar(64) DEFAULT NULL,
     `ip_address` varchar(64) DEFAULT NULL,
+    `ip_port` VARCHAR(64) NULL DEFAULT NULL,
+    `user_agent` TEXT NULL DEFAULT NULL,
+    `device_id` VARCHAR(64) NULL DEFAULT NULL,
     PRIMARY KEY  (`id_kevin`),
     KEY `id_order` (`id_order`),
     KEY `payment_id` (`payment_id`)

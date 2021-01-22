@@ -78,10 +78,18 @@ class KevinRedirectModuleFrontController extends ModuleFrontController
 
         $response = $kevinPayment->initPayment($attr);
 
+        $customer_ip_address = $this->getCustomerIpAddress();
+        $customer_ip_port = $this->getCustomerIpPort();
+        $customer_user_agent = $this->getCustomerUserAgent();
+        $customer_device_id = $this->getCustomerDeviceId();
+
         Db::getInstance()->insert('kevin', array(
             'id_order' => (int)$order_id,
             'payment_id' => pSQL($response['id']),
-            'ip_address' => pSQL(Tools::getRemoteAddr()),
+            'ip_address' => pSQL($customer_ip_address),
+            'ip_port' => pSQL($customer_ip_port),
+            'user_agent' => pSQL($customer_user_agent),
+            'device_id' => pSQL($customer_device_id),
         ));
 
         $lang = $this->context->language->iso_code;
@@ -105,5 +113,59 @@ class KevinRedirectModuleFrontController extends ModuleFrontController
         array_push($this->errors, $this->module->l($message), $description);
 
         return $this->setTemplate('error.tpl');
+    }
+
+    /**
+     * @return string
+     */
+    private function getCustomerIpAddress()
+    {
+        return Tools::getRemoteAddr();
+    }
+
+    /**
+     * @return string
+     */
+    private function getCustomerIpPort()
+    {
+        if (isset($_SERVER['HTTP_X_REAL_PORT'])) {
+            return trim($_SERVER['HTTP_X_REAL_PORT']);
+        } elseif (isset($_SERVER['HTTP_X_FORWARDED_PORT'])) {
+            return trim($_SERVER['HTTP_X_FORWARDED_PORT']);
+        } elseif (isset($_SERVER['REMOTE_PORT'])) {
+            return trim($_SERVER['REMOTE_PORT']);
+        }
+
+        return '';
+    }
+
+    /**
+     * @return string
+     */
+    private function getCustomerUserAgent()
+    {
+        return isset($_SERVER['HTTP_USER_AGENT']) ? trim($_SERVER['HTTP_USER_AGENT']) : '';
+    }
+
+    /**
+     * @return string
+     */
+    private function getCustomerDeviceId()
+    {
+        return $this->uuid();
+    }
+
+    /**
+     * @return string
+     */
+    private function uuid()
+    {
+        return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+        );
     }
 }

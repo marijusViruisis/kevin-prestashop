@@ -4,7 +4,7 @@
 
 ## Prerequisites
 
-- PrestaShop 1.7
+- PrestaShop 1.6 and 1.7
 - PHP 5.6 or later
 
 ## Support

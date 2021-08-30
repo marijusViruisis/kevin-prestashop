@@ -26,9 +26,9 @@
 					</a>
 				</div>
 				<div class="media-body media-middle">
-					{l s='Website' mod='kevin'}: <a href="https://www.getkevin.eu/" title="{l s='Website' mod='kevin'}" target="_blank">getkevin.eu</a>
+					{l s='Website' mod='kevin'}: <a href="https://www.getkevin.eu/" title="{l s='Website' mod='kevin'}" target="_blank">www.getkevin.eu</a>
 					<br>
-					{l s='Support' mod='kevin'}: <a href="mailto:support@getkevin.eu" title="{l s='Support' mod='kevin'}">support@getkevin.eu</a>
+					{l s='Support' mod='kevin'}: <a href="mailto:help@getkevin.eu" title="{l s='Support' mod='kevin'}">help@getkevin.eu</a>
 				</div>
 			</div>
 		</div>

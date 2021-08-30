@@ -1,5 +1,4 @@
-<?php
-/*
+{*
 * 2020 kevin.
 *
 * NOTICE OF LICENSE
@@ -15,22 +14,13 @@
 *  @author 2020 kevin. <info@getkevin.eu>
 *  @copyright kevin.
 *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
-*/
-
-$sql = array();
-
-$sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'kevin` (
-    `id_kevin` int(11) NOT NULL AUTO_INCREMENT,
-    `id_order` int(11) UNSIGNED NOT NULL,
-    `payment_id` varchar(64) DEFAULT NULL,
-    `ip_address` varchar(64) DEFAULT NULL,
-    PRIMARY KEY  (`id_kevin`),
-    KEY `id_order` (`id_order`),
-    KEY `payment_id` (`payment_id`)
-) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;';
-
-foreach ($sql as $query) {
-    if (Db::getInstance()->execute($query) == false) {
-        return false;
-    }
-}
+*}
+{if $group == 'failed'}
+    <p class="alert alert-danger">
+        {l s='Order payment canceled' mod='kevin'}
+    </p>
+{else}
+    <p class="alert alert-warning">
+        {l s='We will start executing the order only after receiving the payment' mod='kevin'}
+    </p>
+{/if}

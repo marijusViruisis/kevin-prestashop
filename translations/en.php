@@ -28,3 +28,7 @@ $_MODULE['<{kevin}prestashop>kevin_efc9732522e9b2e2718488950ef95e2b'] = 'Payment
 $_MODULE['<{kevin}prestashop>kevin_3e984424a2dcd938412cace671b40e59'] = 'Payment Pending';
 $_MODULE['<{kevin}prestashop>kevin_66e59abdb49ba901e35c4950ac216347'] = 'Payment Completed';
 $_MODULE['<{kevin}prestashop>kevin_952b6559aa617beb13b98a54917c728f'] = 'Payment Failed';
+$_MODULE['<{kevin}prestashop>order-confirmation_7f21696f11929f5ed55ca5bcb15d2fc1'] = 'Your order is confirmed';
+$_MODULE['<{kevin}prestashop>order-confirmation_e19e31ddb54b493059808ec4f2dab4cb'] = 'Your order ID is:';
+$_MODULE['<{kevin}prestashop>order-confirmation_787027739dfe9128a01a57edbbc6f077'] = 'An email has been sent to your mail address:';
+$_MODULE['<{kevin}prestashop>payment_970d2132c1100ebc99bf63a59f5056d0'] = 'Redirect to bank login';

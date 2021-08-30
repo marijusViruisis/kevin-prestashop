@@ -1,40 +1,42 @@
 <?php
-/*
-* 2020 kevin.
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-*  @author 2020 kevin. <info@getkevin.eu>
-*  @copyright kevin.
-*  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
-*/
 
-class KevinConfirmModuleFrontController extends ModuleFrontController
-{
+/*
+ * 2020 kevin.
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ *  @author 2020 kevin. <info@getkevin.eu>
+ *  @copyright kevin.
+ *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+
+class KevinConfirmModuleFrontController extends ModuleFrontController {
+
     /**
      * Process confirm request.
      */
-    public function postProcess()
-    {
+    public function postProcess() {
         if (!$this->module->active) {
             Tools::redirect('index');
         }
 
         $payment_id = Tools::getValue('paymentId');
+
         if (!$payment_id) {
 
             return $this->displayError($this->module->l('An error occurred. Please contact the merchant for more information.'));
         }
 
         $sql = 'SELECT * FROM ' . _DB_PREFIX_ . 'kevin WHERE payment_id = \'' . pSQL($payment_id) . '\'';
+
         if ($row = Db::getInstance()->getRow($sql)) {
 
             try {
@@ -42,67 +44,68 @@ class KevinConfirmModuleFrontController extends ModuleFrontController
                 if (!Validate::isLoadedObject($order)) {
                     Tools::redirect($this->context->link->getPageLink('order'));
                 }
-
                 $customer = new Customer($order->id_customer);
+
                 if (!Validate::isLoadedObject($customer)) {
                     Tools::redirect($this->context->link->getPageLink('order'));
                 }
-
                 $attr = array(
                     'PSU-IP-Address' => $row['ip_address'],
-                    'PSU-IP-Port' => $row['ip_port'],
-                    'PSU-User-Agent' => $row['user_agent'],
-                    'PSU-Device-ID' => $row['device_id'],
                 );
-
                 $kevinPayment = $this->module->getClient()->payment();
                 $response = $kevinPayment->getPaymentStatus($row['payment_id'], $attr);
-
-                $os_started = Configuration::get('KEVIN_ORDER_STATUS_STARTED');
-                $os_pending = Configuration::get('KEVIN_ORDER_STATUS_PENDING');
-                $os_completed = Configuration::get('KEVIN_ORDER_STATUS_COMPLETED');
-                $os_failed = Configuration::get('KEVIN_ORDER_STATUS_FAILED');
-
-                // Refresh order data after API call
-                $order = new Order($row['id_order']);
-
+                $paymentinfo = $kevinPayment->getPayment($row['payment_id'], array('PSU-IP-Address' => $row['ip_address']));
+                $kevinAuth = $this->module->getClient()->auth();
+                $response['payment_id'] = $row['payment_id'];
+                if (isset($paymentinfo['cardStatus']) || isset($paymentinfo['cardStatus'])) {
+                    $order->payment = 'Kevin (Credit/Debit card)';
+//                    $order->update();
+                } else {
+                    if (isset($paymentinfo['bankPaymentMethod']['bankId'])) {
+                        $bank = $kevinAuth->getBank($paymentinfo['bankPaymentMethod']['bankId']);
+                        if (!empty($bank['officialName'])) {
+                            $order->payment = 'Kevin (' . $bank['officialName'] . ')';
+//                        $order->update();
+                        }
+                    } else {
+                        $order->payment = 'Kevin';
+                    }
+                }
                 $old_os_id = $order->getCurrentOrderState()->id;
                 $new_os_id = null;
-
-                if (in_array($old_os_id, array($os_started))) {
-                    if ($response['group'] === 'failed') {
-                        $new_os_id = $os_failed;
-                    } else {
-                        $new_os_id = $os_pending;
-                    }
+                switch ($response['group']) {
+                    case 'started':
+                        $new_os_id = Configuration::get('KEVIN_ORDER_STATUS_STARTED');
+                        break;
+                    case 'pending':
+                        $new_os_id = Configuration::get('KEVIN_ORDER_STATUS_PENDING');
+                        break;
+                    case 'completed':
+                        $new_os_id = Configuration::get('PS_OS_PAYMENT');
+                        break;
+                    case 'failed':
+                        $new_os_id = Configuration::get('PS_OS_ERROR');
+                        break;
+                    default:
+                        $new_os_id = null;
                 }
 
-                if (!in_array($old_os_id, array($os_started, $os_pending, $os_completed, $os_failed))) {
+                if (!$new_os_id) {
                     Tools::redirect($this->context->link->getPageLink('order'));
                 }
-
-                if ($old_os_id !== $new_os_id) {
-                    // Payment statuses must follow correct order.
-                    switch ($old_os_id) {
-                        case $os_started:
-                            $order->setCurrentState($new_os_id);
-                            break;
-                        case $os_pending:
-                            if (in_array($new_os_id, array($os_completed, $os_failed))) {
-                                $order->setCurrentState($new_os_id);
-                            }
-                            break;
-                        default:
-                            // Do nothing. Webhook will take care of statuses.
-                    }
+                       $sql = "DELETE FROM `" . _DB_PREFIX_ . "order_payment` WHERE `order_reference` = '{$order->reference}'";
+                    Db::getInstance()->execute($sql);
+                if (($old_os_id == Configuration::get('KEVIN_ORDER_STATUS_STARTED') || $old_os_id == Configuration::get('KEVIN_ORDER_STATUS_PENDING')) && $old_os_id != Configuration::get('PS_OS_PAYMENT')
+                ) {
+                    $order->setCurrentState($new_os_id);
                 }
-
                 $params = array(
-                    'id_order' => $order->id,
-                    'id_module' => $this->module->id,
                     'id_cart' => $order->id_cart,
-                    'key' => $customer->secure_key
+                    'id_module' => $this->module->id,
+                    'id_order' => $order->id,
+                    'key' => $customer->secure_key,
                 );
+
                 Tools::redirect($this->context->link->getPageLink('order-confirmation', null, null, $params));
             } catch (\Kevin\KevinException $e) {
 
@@ -118,8 +121,7 @@ class KevinConfirmModuleFrontController extends ModuleFrontController
      * @param bool $description
      * @throws PrestaShopException
      */
-    protected function displayError($message, $description = false)
-    {
+    protected function displayError($message, $description = false) {
         $value = '<a href="' . $this->context->link->getPageLink('order') . '">' . $this->module->l('Payment') . '</a>';
         $value .= '<span class="navigation-pipe">&gt;</span>' . $this->module->l('Error');
         $this->context->smarty->assign('path', $value);
@@ -128,4 +130,5 @@ class KevinConfirmModuleFrontController extends ModuleFrontController
 
         return $this->setTemplate('error.tpl');
     }
+
 }

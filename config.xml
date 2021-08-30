@@ -2,13 +2,13 @@
 <module>
 	<name>kevin</name>
 	<displayName><![CDATA[kevin.]]></displayName>
-	<version><![CDATA[1.7.9]]></version>
+	<version><![CDATA[1.8.9]]></version>
 	<description><![CDATA[kevin. is a payment infrastructure company which offers payment initiation service in EU&EEA.]]></description>
 	<author><![CDATA[kevin.]]></author>
 	<tab><![CDATA[payments_gateways]]></tab>
 	<confirmUninstall><![CDATA[Are you sure you would like to uninstall?]]></confirmUninstall>
 	<is_configurable>1</is_configurable>
 	<need_instance>1</need_instance>
-	<limited_countries>lt,lv,ee</limited_countries>
+	<limited_countries>en,lt,lv,ee,fi,se,ru,pl</limited_countries>
 	<limited_currencies>eur</limited_currencies>
 </module>

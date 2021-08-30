@@ -1,29 +1,29 @@
 <?php
-/*
-* 2020 kevin.
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-*  @author 2020 kevin. <info@getkevin.eu>
-*  @copyright kevin.
-*  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
-*/
 
-class KevinRedirectModuleFrontController extends ModuleFrontController
-{
+/*
+ * 2020 kevin.
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ *  @author 2020 kevin. <info@getkevin.eu>
+ *  @copyright kevin.
+ *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+
+class KevinRedirectModuleFrontController extends ModuleFrontController {
+
     /**
      * Process redirect request.
      */
-    public function postProcess()
-    {
+    public function postProcess() {
         if (!$this->module->active) {
             Tools::redirect('index.php?controller=order&step=3');
         }
@@ -42,11 +42,23 @@ class KevinRedirectModuleFrontController extends ModuleFrontController
         $message = null;
         $currency_id = $cart->id_currency;
         $secure_key = $customer->secure_key;
+        $bank_id = Tools::getValue('id');
+        $kevinAuth = $this->module->getClient()->auth();
+        if ($bank_id == 'card') {
+            $module_name = 'Kevin (Credit/Debit card)';
+        } else {
+            $bank = $kevinAuth->getBank($bank_id);
+            if (!empty($bank['officialName'])) {
+                $module_name = 'Kevin (' . $bank['officialName'] . ')';
+            } else {
+                $module_name = $this->module->displayName;
+            }
+        }
 
         $this->module->validateOrder($cart_id, $payment_status, $cart->getOrderTotal(), $module_name, $message, array(), $currency_id, false, $secure_key);
 
         $order_id = Order::getOrderByCartId($cart_id);
-
+        $order = new Order($order_id);
         $bank_id = Tools::getValue('id');
         $kevinPayment = $this->module->getClient()->payment();
 
@@ -57,39 +69,40 @@ class KevinRedirectModuleFrontController extends ModuleFrontController
         if ($redirect_preferred === false) {
             $redirect_preferred = 1;
         }
-
+        $cancelParams = array('cartID' => $cart_id);
         $attr = [
+            'amount' => number_format($cart->getOrderTotal(), 2, '.', ''),
+            'currencyCode' => $currency->iso_code,
+            'description' => sprintf($this->module->l('Order') . ' %s', $order->reference),
+            'identifier' => ['email' => $customer->email],
             'redirectPreferred' => boolval($redirect_preferred),
             'Redirect-URL' => $this->context->link->getModuleLink('kevin', 'confirm', array(), true),
             'Webhook-URL' => $this->context->link->getModuleLink('kevin', 'webhook', array(), true),
-            'endToEndId' => strval($order_id),
-            'informationUnstructured' => sprintf($this->module->l('Order') . ' %s', $order_id),
-            'currencyCode' => $currency->iso_code,
-            'amount' => number_format($cart->getOrderTotal(), 2, '.', ''),
+            'Cancel-URL' => $this->context->link->getModuleLink('kevin', 'cancel', array(), true),
+        ];
+
+        $attr['bankPaymentMethod'] = [
             'creditorName' => $creditor_name,
+            'endToEndId' => strval($order_id),
             'creditorAccount' => [
                 'iban' => $creditor_account,
             ],
         ];
-
         if ($bank_id !== null) {
-            $attr['bankId'] = $bank_id;
+            if ($bank_id == 'card') {
+                $attr['cardPaymentMethod'] = [
+                ];
+                $attr['paymentMethodPreferred'] = 'card';
+            } else {
+                $attr['bankId'] = $bank_id;
+            }
         }
-
         $response = $kevinPayment->initPayment($attr);
 
-        $customer_ip_address = $this->getCustomerIpAddress();
-        $customer_ip_port = $this->getCustomerIpPort();
-        $customer_user_agent = $this->getCustomerUserAgent();
-        $customer_device_id = $this->getCustomerDeviceId();
-
         Db::getInstance()->insert('kevin', array(
-            'id_order' => (int)$order_id,
+            'id_order' => (int) $order_id,
             'payment_id' => pSQL($response['id']),
-            'ip_address' => pSQL($customer_ip_address),
-            'ip_port' => pSQL($customer_ip_port),
-            'user_agent' => pSQL($customer_user_agent),
-            'device_id' => pSQL($customer_device_id),
+            'ip_address' => pSQL(Tools::getRemoteAddr()),
         ));
 
         $lang = $this->context->language->iso_code;
@@ -104,8 +117,7 @@ class KevinRedirectModuleFrontController extends ModuleFrontController
      * @param bool $description
      * @throws PrestaShopException
      */
-    protected function displayError($message, $description = false)
-    {
+    protected function displayError($message, $description = false) {
         $value = '<a href="' . $this->context->link->getPageLink('order', null, null, 'step=3') . '">' . $this->module->l('Payment') . '</a>';
         $value .= '<span class="navigation-pipe">&gt;</span>' . $this->module->l('Error');
         $this->context->smarty->assign('path', $value);
@@ -115,57 +127,4 @@ class KevinRedirectModuleFrontController extends ModuleFrontController
         return $this->setTemplate('error.tpl');
     }
 
-    /**
-     * @return string
-     */
-    private function getCustomerIpAddress()
-    {
-        return Tools::getRemoteAddr();
-    }
-
-    /**
-     * @return string
-     */
-    private function getCustomerIpPort()
-    {
-        if (isset($_SERVER['HTTP_X_REAL_PORT'])) {
-            return trim($_SERVER['HTTP_X_REAL_PORT']);
-        } elseif (isset($_SERVER['HTTP_X_FORWARDED_PORT'])) {
-            return trim($_SERVER['HTTP_X_FORWARDED_PORT']);
-        } elseif (isset($_SERVER['REMOTE_PORT'])) {
-            return trim($_SERVER['REMOTE_PORT']);
-        }
-
-        return '';
-    }
-
-    /**
-     * @return string
-     */
-    private function getCustomerUserAgent()
-    {
-        return isset($_SERVER['HTTP_USER_AGENT']) ? trim($_SERVER['HTTP_USER_AGENT']) : '';
-    }
-
-    /**
-     * @return string
-     */
-    private function getCustomerDeviceId()
-    {
-        return $this->uuid();
-    }
-
-    /**
-     * @return string
-     */
-    private function uuid()
-    {
-        return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0x0fff) | 0x4000,
-            mt_rand(0, 0x3fff) | 0x8000,
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
-        );
-    }
 }

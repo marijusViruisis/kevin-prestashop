@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+	<name>kevin</name>
+	<displayName><![CDATA[kevin.]]></displayName>
+	<version><![CDATA[1.8.10]]></version>
+	<description><![CDATA[kevin. is a payment infrastructure company which offers payment initiation service in EU&amp;EEA.]]></description>
+	<author><![CDATA[kevin.]]></author>
+	<tab><![CDATA[payments_gateways]]></tab>
+	<confirmUninstall><![CDATA[Ar tikrai norite ištrinti šį modulį?]]></confirmUninstall>
+	<is_configurable>1</is_configurable>
+	<need_instance>1</need_instance>
+	<limited_countries></limited_countries>
+</module>

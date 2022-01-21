@@ -1,4 +1,4 @@
-/*
+{*
 * 2020 kevin.
 *
 * NOTICE OF LICENSE
@@ -14,22 +14,13 @@
 *  @author 2020 kevin. <help@kevin.eu>
 *  @copyright kevin.
 *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
-*/
-
-.kevin-header .media-left {
-    display: table-cell;
-    vertical-align: top;
-    padding-right: 10px;
-}
-
-.kevin-header .media-body {
-    display: table-cell;
-    vertical-align: top;
-    width: 10000px;
-    overflow: hidden;
-    zoom: 1;
-}
-
-.kevin-header .media-middle {
-    vertical-align: middle;
-}
+*}
+{if $group == 'failed'}
+    <p class="alert alert-danger">
+        {l s='Order payment canceled' mod='kevin'}
+    </p>
+{else}
+    <p class="alert alert-warning">
+        {l s='We will start executing the order only after receiving the payment' mod='kevin'}
+    </p>
+{/if}

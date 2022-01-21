@@ -11,7 +11,7 @@
 * obtain it through the world-wide-web, please send an email
 * to license@prestashop.com so we can send you a copy immediately.
 *
-*  @author 2020 Tammi <info@tammi.lt>
+*  @author 2020 kevin. <help@kevin.eu>
 *  @copyright kevin.
 *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
 *}
@@ -26,9 +26,9 @@
 					</a>
 				</div>
 				<div class="media-body media-middle">
-					{l s='Website' mod='kevin'}: <a href="https://www.getkevin.eu/" title="{l s='Website' mod='kevin'}" target="_blank">getkevin.eu</a>
+					{l s='Website' mod='kevin'}: <a href="https://www.kevin.eu/" title="{l s='Website' mod='kevin'}" target="_blank">www.kevin.eu</a>
 					<br>
-					{l s='Support' mod='kevin'}: <a href="mailto:support@getkevin.eu" title="{l s='Support' mod='kevin'}">support@getkevin.eu</a>
+					{l s='Support' mod='kevin'}: <a href="mailto:help@kevin.eu" title="{l s='Support' mod='kevin'}">help@kevin.eu</a>
 				</div>
 			</div>
 		</div>

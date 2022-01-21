@@ -1,21 +1,23 @@
 <?php
+
 /*
-* 2020 kevin.
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-*  @author 2020 Tammi <info@tammi.lt>
-*  @copyright kevin.
-*  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
-*/
+ * 2020 kevin.
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ *  @author 2020 kevin. <help@kevin.eu>
+ *  @copyright kevin.
+ *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -26,12 +28,11 @@ require_once __DIR__ . '/vendor/autoload.php';
 /**
  * Class Kevin
  */
-class Kevin extends PaymentModule
-{
+class Kevin extends PaymentModule {
+
     protected $_html = '';
     protected $_postErrors = array();
     protected $_warning;
-
     public $clientId;
     public $clientSecret;
     public $creditorName;
@@ -41,15 +42,13 @@ class Kevin extends PaymentModule
      * Kevin constructor.
      * @throws PrestaShopException
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->name = 'kevin';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.1';
-        $this->ps_versions_compliancy = array('min' => '1.6', 'max' => '1.6');
-        $this->author = 'Tammi';
+        $this->version = '1.8.10';
+        $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
+        $this->author = 'kevin.';
         $this->controllers = array('redirect', 'confirm', 'webhook');
-        $this->need_instance = 0;
 
         $this->bootstrap = true;
         parent::__construct();
@@ -59,8 +58,11 @@ class Kevin extends PaymentModule
 
         $this->confirmUninstall = $this->l('Are you sure you would like to uninstall?');
 
-        $this->limited_countries = array('LT', 'LV', 'EE');
-        $this->limited_currencies = array('EUR');
+        $this->limited_countries = array( 'AT','BE','BG','CZ','DE','DK','EE','ES','FI','FR','GR','HR','HU','IT','LT','LU','LV','NL','PL','PT','RO','SE','SI','SK');
+        $this->limited_currencies = array('EUR','PLN','BGN','HRK','CZK','DKK','HUF','RON','SEK','CHF');
+
+        $this->currencies = true;
+        $this->currencies_mode = 'checkbox';
 
         $config = Configuration::getMultiple(array('KEVIN_CLIENT_ID', 'KEVIN_CLIENT_SECRET'));
         if (!empty($config['KEVIN_CLIENT_ID'])) {
@@ -81,7 +83,7 @@ class Kevin extends PaymentModule
             $this->creditorAccount = $config['KEVIN_CREDITOR_ACCOUNT'];
         }
         if (!$this->_warning && (!isset($this->creditorName) || !isset($this->creditorAccount))) {
-            $this->_warning = $this->l('Creditor Name and Creditor Account must be configured before using this module.');
+            $this->_warning = $this->l('Company Name and Company Bank Account must be configured before using this module.');
         }
     }
 
@@ -92,8 +94,7 @@ class Kevin extends PaymentModule
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
-    public function install()
-    {
+    public function install() {
         $iso_code = Country::getIsoById(Configuration::get('PS_COUNTRY_DEFAULT'));
 
         if (in_array($iso_code, $this->limited_countries) == false) {
@@ -110,9 +111,65 @@ class Kevin extends PaymentModule
         }
 
         return parent::install() &&
-            $this->registerHook('header') &&
-            $this->registerHook('backOfficeHeader') &&
-            $this->registerHook('payment');
+                $this->registerHook('header') &&
+                $this->registerHook('backOfficeHeader') &&
+                $this->registerHook('payment') &&
+                $this->registerHook('orderConfirmation') &&
+                $this->registerHook('paymentOptions') &&
+                $this->registerHook('displayAdminOrderContentShip') &&
+                $this->registerHook('displayBackOfficeHeader') &&
+                $this->registerHook('displayAdminOrderTabShip') &&
+                $this->registerHook('displayAdminOrderTabLink') &&
+                $this->registerHook('displayAdminOrderTabContent') &&
+                $this->registerHook('hookActionOrderSlipAdd') &&
+                $this->registerHook('displayOrderConfirmation')&&
+                $this->addCheckboxCountryRestrictionsForModule() &&
+                $this->addCheckboxCurrencyRestrictionsForModule();
+    }
+
+    public function addCheckboxCountryRestrictionsForModule(array $shops = array())
+    {
+        $countries = array();
+        foreach ($this->limited_countries as $limited_country)
+        {
+            $countries[] = ['id_country' => Country::getByIso($limited_country)];
+        }
+
+        return Country::addModuleRestrictions($shops, $countries, array(array('id_module' => (int)$this->id)));
+    }
+
+    public function addCheckboxCurrencyRestrictionsForModule(array $shops = array())
+    {
+        if (!$shops) {
+            $shops = Shop::getShops(true, null, true);
+        }
+
+        $modules = array(array('id_module' => (int)$this->id));
+
+        $currencies = array();
+        foreach ($this->limited_currencies as $limited_currency)
+        {
+            $id_currency = Currency::getIdByIsoCode($limited_currency);
+            if($id_currency)
+            $currencies[] = ['id_currency' => $id_currency];
+        }
+
+
+        $sql = false;
+        foreach ($shops as $id_shop) {
+            foreach ($currencies as $currency) {
+                foreach ($modules as $module) {
+                    $sql .= '('.(int)$module['id_module'].', '.(int)$id_shop.', '.(int)$currency['id_currency'].'),';
+                }
+            }
+        }
+
+        if ($sql) {
+            $sql = 'INSERT IGNORE INTO `'._DB_PREFIX_.'module_currency` (`id_module`, `id_shop`, `id_currency`) VALUES '.rtrim($sql, ',');
+            return Db::getInstance()->execute($sql);
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -122,8 +179,7 @@ class Kevin extends PaymentModule
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
-    public function uninstall()
-    {
+    public function uninstall() {
         $config_form_values = $this->getConfigFormValues();
         foreach (array_keys($config_form_values) as $config_key) {
             Configuration::deleteByName($config_key);
@@ -137,12 +193,26 @@ class Kevin extends PaymentModule
 
         include(dirname(__FILE__) . '/sql/uninstall.php');
 
-        return parent::uninstall()
-            && $this->unregisterHook('header')
-            && $this->unregisterHook('backOfficeHeader')
-            && $this->unregisterHook('payment');
+        return parent::uninstall() &&
+                $this->unregisterHook('header') &&
+                $this->unregisterHook('backOfficeHeader') &&
+                $this->unregisterHook('payment') &&
+                $this->unregisterHook('orderConfirmation') &&
+                $this->unregisterHook('paymentOptions') &&
+                $this->unregisterHook('displayOrderConfirmation') &&
+                $this->unregisterHook('hookActionOrderSlipAdd');
     }
 
+    public function reset() {
+        if (!$this->uninstall(false)) {
+            return false;
+        }
+        if (!$this->install(false)) {
+            return false;
+        }
+
+        return true;
+    }
 
     /**
      * Load the configuration form.
@@ -150,8 +220,7 @@ class Kevin extends PaymentModule
      * @return string
      * @throws SmartyException
      */
-    public function getContent()
-    {
+    public function getContent() {
         $is_submit = false;
         $buttons = ['submitKevinModule1', 'submitKevinModule2', 'submitKevinModule3'];
         foreach ($buttons as $button) {
@@ -178,6 +247,8 @@ class Kevin extends PaymentModule
             $this->_html .= $this->displayError($this->_warning);
         }
 
+        $this->context->controller->addCSS($this->_path . '/views/css/back.css');
+
         $this->context->smarty->assign('module_dir', $this->_path);
 
         $this->_html .= $this->context->smarty->fetch($this->local_path . 'views/templates/admin/configure.tpl');
@@ -191,8 +262,7 @@ class Kevin extends PaymentModule
      *
      * @return string
      */
-    protected function renderForm()
-    {
+    protected function renderForm() {
         $client_form = array(
             'form' => array(
                 'legend' => array(
@@ -214,6 +284,13 @@ class Kevin extends PaymentModule
                         'name' => 'KEVIN_CLIENT_SECRET',
                         'required' => true,
                     ),
+                    array(
+                        'col' => 6,
+                        'type' => 'text',
+                        'label' => $this->l('Endpoint Secret'),
+                        'name' => 'KEVIN_ENDPOINT_SECRET',
+                        'required' => true,
+                    ),
                 ),
                 'submit' => array(
                     'title' => $this->l('Save'),
@@ -225,21 +302,21 @@ class Kevin extends PaymentModule
         $creditor_form = array(
             'form' => array(
                 'legend' => array(
-                    'title' => $this->l('Creditor Details'),
+                    'title' => $this->l('Company Details'),
                     'icon' => 'icon-user',
                 ),
                 'input' => array(
                     array(
                         'col' => 6,
                         'type' => 'text',
-                        'label' => $this->l('Creditor Name'),
+                        'label' => $this->l('Company Name'),
                         'name' => 'KEVIN_CREDITOR_NAME',
                         'required' => true,
                     ),
                     array(
                         'col' => 6,
                         'type' => 'text',
-                        'label' => $this->l('Creditor Account'),
+                        'label' => $this->l('Company Bank Account'),
                         'name' => 'KEVIN_CREDITOR_ACCOUNT',
                         'required' => true,
                     ),
@@ -296,7 +373,7 @@ class Kevin extends PaymentModule
         $helper->identifier = $this->identifier;
         $helper->submit_action = 'submitKevinModule';
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
-            . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
+                . '&configure=' . $this->name . '&tab_module=' . $this->tab . '&module_name=' . $this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
 
         $helper->tpl_vars = array(
@@ -313,8 +390,7 @@ class Kevin extends PaymentModule
      *
      * @return array
      */
-    protected function getConfigFormValues()
-    {
+    protected function getConfigFormValues() {
         $redirectPreferred = Tools::getValue('KEVIN_REDIRECT_PREFERRED', Configuration::get('KEVIN_REDIRECT_PREFERRED'));
         if ($redirectPreferred === false) {
             $redirectPreferred = 1;
@@ -323,6 +399,7 @@ class Kevin extends PaymentModule
         return array(
             'KEVIN_CLIENT_ID' => Tools::getValue('KEVIN_CLIENT_ID', Configuration::get('KEVIN_CLIENT_ID')),
             'KEVIN_CLIENT_SECRET' => Tools::getValue('KEVIN_CLIENT_SECRET', Configuration::get('KEVIN_CLIENT_SECRET')),
+            'KEVIN_ENDPOINT_SECRET' => Tools::getValue('KEVIN_ENDPOINT_SECRET', Configuration::get('KEVIN_ENDPOINT_SECRET')),
             'KEVIN_CREDITOR_NAME' => Tools::getValue('KEVIN_CREDITOR_NAME', Configuration::get('KEVIN_CREDITOR_NAME')),
             'KEVIN_CREDITOR_ACCOUNT' => Tools::getValue('KEVIN_CREDITOR_ACCOUNT', Configuration::get('KEVIN_CREDITOR_ACCOUNT')),
             'KEVIN_REDIRECT_PREFERRED' => $redirectPreferred,
@@ -332,20 +409,19 @@ class Kevin extends PaymentModule
     /**
      * Validate form data.
      */
-    protected function postValidation()
-    {
-        if (((bool)Tools::isSubmit('submitKevinModule1')) === true) {
+    protected function postValidation() {
+        if (((bool) Tools::isSubmit('submitKevinModule1')) === true) {
             if (!Tools::getValue('KEVIN_CLIENT_ID')) {
                 $this->_postErrors[] = $this->l('Client ID is required.');
             } elseif (!Tools::getValue('KEVIN_CLIENT_SECRET')) {
                 $this->_postErrors[] = $this->l('Client Secret is required.');
             }
         }
-        if (((bool)Tools::isSubmit('submitKevinModule2')) === true) {
+        if (((bool) Tools::isSubmit('submitKevinModule2')) === true) {
             if (!Tools::getValue('KEVIN_CREDITOR_NAME')) {
-                $this->_postErrors[] = $this->l('Creditor Name is required.');
+                $this->_postErrors[] = $this->l('Company Name is required.');
             } elseif (!Tools::getValue('KEVIN_CREDITOR_ACCOUNT')) {
-                $this->_postErrors[] = $this->l('Creditor Account is required.');
+                $this->_postErrors[] = $this->l('Company Bank Account is required.');
             }
         }
     }
@@ -353,8 +429,7 @@ class Kevin extends PaymentModule
     /**
      * Save form data.
      */
-    protected function postProcess()
-    {
+    protected function postProcess() {
         $config_form_values = $this->getConfigFormValues();
         foreach (array_keys($config_form_values) as $key) {
             Configuration::updateValue($key, Tools::getValue($key));
@@ -364,18 +439,190 @@ class Kevin extends PaymentModule
     /**
      * Hook files for frontend.
      */
-    public function hookHeader()
+    public function hookHeader() {
+        $this->context->controller->addCSS($this->_path . 'views/css/front.css');
+    }
+
+    public function hookActionOrderSlipAdd($params)
     {
-        $this->context->controller->addCSS($this->_path . '/views/css/front.css');
+            $this->hookBackOfficeHeader();
     }
 
     /**
      * Hook files for frontend.
      */
-    public function hookBackOfficeHeader()
-    {
+    public function hookBackOfficeHeader() {
         if (Tools::getValue('module_name') == $this->name) {
-            $this->context->controller->addCSS($this->_path . '/views/css/back.css');
+            $this->context->controller->addCSS($this->_path . 'views/css/back.css');
+        }
+        if (Tools::getValue('id_order')) {
+            $this->context->controller->addJquery();
+            Media::addJsDefL('kevin_text', $this->l('Get your money back through the kevin system'));
+            Media::addJsDefL('id_order', Tools::getValue('id_order'));
+            $this->context->controller->addJs($this->_path . "views/js/back.js?v={$this->version}");
+        }
+        $order = new Order(Tools::getValue('id_order'));
+        if (Tools::isSubmit('partialRefund') && isset($order) && Tools::getValue('refundwithkevin')) {
+            if (Tools::isSubmit('partialRefundProduct') && ($refunds = Tools::getValue('partialRefundProduct')) && is_array($refunds)) {
+                $amount = 0;
+                $order_detail_list = array();
+                $full_quantity_list = array();
+                foreach ($refunds as $id_order_detail => $amount_detail) {
+                    $quantity = Tools::getValue('partialRefundProductQuantity');
+                    if (!$quantity[$id_order_detail]) {
+                        continue;
+                    }
+
+                    $full_quantity_list[$id_order_detail] = (int) $quantity[$id_order_detail];
+
+                    $order_detail_list[$id_order_detail] = array(
+                        'quantity' => (int) $quantity[$id_order_detail],
+                        'id_order_detail' => (int) $id_order_detail,
+                    );
+
+                    $order_detail = new OrderDetail((int) $id_order_detail);
+                    if (empty($amount_detail)) {
+                        $order_detail_list[$id_order_detail]['unit_price'] = (!Tools::getValue('TaxMethod') ? $order_detail->unit_price_tax_excl : $order_detail->unit_price_tax_incl);
+                        $order_detail_list[$id_order_detail]['amount'] = $order_detail->unit_price_tax_incl * $order_detail_list[$id_order_detail]['quantity'];
+                    } else {
+                        $order_detail_list[$id_order_detail]['amount'] = (float) str_replace(',', '.', $amount_detail);
+                        $order_detail_list[$id_order_detail]['unit_price'] = $order_detail_list[$id_order_detail]['amount'] / $order_detail_list[$id_order_detail]['quantity'];
+                    }
+                    $amount += $order_detail_list[$id_order_detail]['amount'];
+                }
+
+                $shipping_cost_amount = (float) str_replace(',', '.', Tools::getValue('partialRefundShippingCost')) ? (float) str_replace(',', '.', Tools::getValue('partialRefundShippingCost')) : false;
+
+                if ($amount == 0 && $shipping_cost_amount == 0) {
+                    if (!empty($refunds)) {
+                        $this->errors[] = $this->l('Please enter a quantity to proceed with your refund.', array(), 'Admin.Orderscustomers.Notification');
+                    } else {
+                        $this->errors[] = $this->l('Please enter an amount to proceed with your refund.', array(), 'Admin.Orderscustomers.Notification');
+                    }
+
+                    return false;
+                }
+
+                $choosen = false;
+                $voucher = 0;
+
+                if ((int) Tools::getValue('refund_voucher_off') == 1) {
+                    $amount -= $voucher = (float) Tools::getValue('order_discount_price');
+                } elseif ((int) Tools::getValue('refund_voucher_off') == 2) {
+                    $choosen = true;
+                    $amount = $voucher = (float) Tools::getValue('refund_voucher_choose');
+                }
+
+                if ($shipping_cost_amount > 0) {
+                    if (!Tools::getValue('TaxMethod')) {
+                        $tax = new Tax();
+                        $tax->rate = $order->carrier_tax_rate;
+                        $tax_calculator = new TaxCalculator(array($tax));
+                        $amount += $tax_calculator->addTaxes($shipping_cost_amount);
+                    } else {
+                        $amount += $shipping_cost_amount;
+                    }
+                }
+
+            }
+
+            if (Tools::isSubmit('cancel_product') && ($refunds = Tools::getValue('cancel_product')) && is_array($refunds)) {
+
+
+                $amount = 0;
+                foreach ($refunds as $key => $refund)
+                {
+                    if(strpos($key,'amount' ) !== false){
+                        $amount += $refund;
+                    }
+                }
+
+            }
+
+            $id_order = Tools::getValue('id_order');
+            $sql = 'SELECT * FROM ' . _DB_PREFIX_ . 'kevin WHERE id_order = \'' . pSQL($id_order) . '\'';
+            $order = new Order($id_order);
+
+            if ($row = Db::getInstance()->getRow($sql)) {
+                try {
+                    $paymentId = $row['payment_id'];
+                    $amount = number_format($amount, 2);
+                    if (!$paymentId) {
+                        exit();
+                    }
+                    $kevinPayment = $this->getClient()->payment();
+                    $webhook_url = $this->context->link->getModuleLink('kevin', 'webhook', array(), true);
+                    $attr = [
+                        'amount' => $amount,
+                        'Webhook-URL' => $webhook_url,
+                    ];
+
+                    try {
+                        $response = $kevinPayment->initiatePaymentRefund($paymentId, $attr);
+                    } catch (\Kevin\KevinException $e) {
+                        $customer = new Customer($order->id_customer);
+                        $customer_thread = new CustomerThread();
+                        $customer_thread->id_contact = 0;
+                        $customer_thread->id_customer = (int) $order->id_customer;
+                        $customer_thread->id_shop = (int) $order->id_shop;
+                        $customer_thread->id_order = (int) $order->id;
+                        $customer_thread->id_lang = (int) $order->id_lang;
+                        $customer_thread->email = $customer->email;
+                        $customer_thread->status = 'closed';
+                        $customer_thread->token = Tools::passwdGen(12);
+                        $customer_thread->add();
+                        $customer_message = new CustomerMessage();
+                        $customer_message->id_customer_thread = $customer_thread->id;
+                        $customer_message->id_employee = 0;
+                        $customer_message->message = $e->getMessage();
+                        $customer_message->private = 1;
+                        $customer_message->add();
+                        return true;
+                    }
+
+                    if ($response) {
+                        $customer = new Customer($order->id_customer);
+                        $customer_thread = new CustomerThread();
+                        $customer_thread->id_contact = 0;
+                        $customer_thread->id_customer = (int) $order->id_customer;
+                        $customer_thread->id_shop = (int) $order->id_shop;
+                        $customer_thread->id_order = (int) $order->id;
+                        $customer_thread->id_lang = (int) $order->id_lang;
+                        $customer_thread->email = $customer->email;
+                        $customer_thread->status = 'closed';
+                        $customer_thread->token = Tools::passwdGen(12);
+                        $customer_thread->add();
+                        $customer_message = new CustomerMessage();
+                        $customer_message->id_customer_thread = $customer_thread->id;
+                        $customer_message->id_employee = 0;
+                        $customer_message->message = $this->l('Refund process started. Amount ') . Tools::displayPrice($response['amount']);
+                        $customer_message->private = 1;
+                        $customer_message->add();
+                        return true;
+                    } else {
+                        return $this->displayError($this->l('Refund failed.'));
+                    }
+                } catch (\Kevin\KevinException $e) {
+                    $customer = new Customer($order->id_customer);
+                    $customer_thread = new CustomerThread();
+                    $customer_thread->id_contact = 0;
+                    $customer_thread->id_customer = (int) $order->id_customer;
+                    $customer_thread->id_shop = (int) $order->id_shop;
+                    $customer_thread->id_order = (int) $order->id;
+                    $customer_thread->id_lang = (int) $order->id_lang;
+                    $customer_thread->email = $customer->email;
+                    $customer_thread->status = 'closed';
+                    $customer_thread->token = Tools::passwdGen(12);
+                    $customer_thread->add();
+                    $customer_message = new CustomerMessage();
+                    $customer_message->id_customer_thread = $customer_thread->id;
+                    $customer_message->id_employee = 0;
+                    $customer_message->message = $e->getMessage();
+                    $customer_message->private = 1;
+                    $customer_message->add();
+                    return true;
+                }
+            }
         }
     }
 
@@ -387,10 +634,9 @@ class Kevin extends PaymentModule
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
-    public function hookPayment($params)
-    {
+    public function hookPayment($params) {
         $currency_id = $params['cart']->id_currency;
-        $currency = new Currency((int)$currency_id);
+        $currency = new Currency((int) $currency_id);
 
         if (in_array($currency->iso_code, $this->limited_currencies) == false) {
 
@@ -404,13 +650,28 @@ class Kevin extends PaymentModule
 
         $banks = [];
         $bank_data = $this->getBanks();
-        foreach ($bank_data as $bank_datum) {
-            $banks[] = [
-                'id' => $bank_datum['id'],
-                'title' => $bank_datum['name'],
-                'logo' => $bank_datum['imageUri'],
-                'action' => $this->context->link->getModuleLink($this->name, 'redirect', array('id' => $bank_datum['id']), true),
-            ];
+		if(!$bank_data){
+			return [];
+		}
+        $kevinAuth = $this->getClient()->auth();
+        $paymentMethods = $kevinAuth->getPaymentMethods();
+        if (in_array("bank", $paymentMethods['data'])) {
+            foreach ($bank_data as $bank_datum) {
+                $banks[] = [
+                    'id' => $bank_datum['id'],
+                    'title' => $bank_datum['name'],
+                    'logo' => $bank_datum['imageUri'],
+                    'action' => $this->context->link->getModuleLink($this->name, 'redirect', array('id' => $bank_datum['id']), true),
+                ];
+            }
+            if (in_array("card", $paymentMethods['data'])) {
+                $banks[] = [
+                    'id' => 'card',
+                    'title' => 'Credit/Debit card',
+                    'logo' => Context::getContext()->shop->getBaseURL(true) . 'modules/kevin/views/img/card.png',
+                    'action' => $this->context->link->getModuleLink($this->name, 'redirect', array('id' => 'card'), true),
+                ];
+            }
         }
 
         $this->smarty->assign(array(
@@ -422,14 +683,91 @@ class Kevin extends PaymentModule
     }
 
     /**
+     * Display confirmation page.
+     *
+     * @param $params
+     * @return string
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
+    public function hookOrderConfirmation($params) {
+        $order = $params['objOrder'];
+        return $this->orderconfirm($order->id);
+    }
+
+    /**
+     * Return payment options.
+     *
+     * @param array
+     * @return array|null
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
+     */
+    public function hookPaymentOptions($params) {
+        if (!$this->active) {
+
+            return [];
+        }
+
+        if (!$this->validateCurrency($params['cart'])) {
+
+            return [];
+        }
+
+        if (!$this->validateClientCredentials()) {
+            return [];
+        }
+        $options = [];
+        $bank_data = $this->getBanks();
+		if(!$bank_data){
+			return [];
+		}
+
+        $kevinAuth = $this->getClient()->auth();
+        $paymentMethods = $kevinAuth->getPaymentMethods();
+
+        if (in_array("bank", $paymentMethods['data'])) {
+            foreach ($bank_data as $bank_datum) {
+                $option = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
+                $option->setModuleName($this->name);
+                $option->setCallToActionText($bank_datum['name']);
+                $option->setLogo($bank_datum['imageUri']);
+                $option->setAction($this->context->link->getModuleLink($this->name, 'redirect', array('id' => $bank_datum['id']), true));
+                $options[] = $option;
+            }
+        }
+        if (in_array("card", $paymentMethods['data'])) {
+            $option = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
+            $option->setModuleName($this->name);
+            $option->setCallToActionText('Credit/Debit card');
+            $option->setLogo(Context::getContext()->shop->getBaseURL(true) . 'modules/kevin/views/img/card.png');
+            $option->setAction($this->context->link->getModuleLink($this->name, 'redirect', array('id' => 'card'), true));
+            $options[] = $option;
+        }
+        return $options;
+    }
+
+    /**
      * Return Kevin PHP Client instance.
      *
      * @return \Kevin\Client
      * @throws \Kevin\KevinException
      */
-    public function getClient()
-    {
-        return new \Kevin\Client($this->clientId, $this->clientSecret);
+    public function getClient() {
+        $options = array(
+            'error' => 'exception',
+            'version' => '0.3',
+        );
+        $options = array_merge($options, $this->getSystemData());
+        return new \Kevin\Client($this->clientId, $this->clientSecret, $options);
+    }
+
+    public function getSystemData() {
+        return array(
+            'pluginVersion' => $this->version,
+            'pluginPlatform' => 'PrestaShop',
+            'pluginPlatformVersion' => _PS_VERSION_
+        );
     }
 
     /**
@@ -439,8 +777,7 @@ class Kevin extends PaymentModule
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
-    protected function getBanks()
-    {
+    protected function getBanks() {
         try {
             $cart = $this->context->cart;
             $address = new Address($cart->id_address_invoice);
@@ -461,10 +798,10 @@ class Kevin extends PaymentModule
      *
      * @return array[]
      */
-    protected function getDefaultOrderStatuses()
-    {
+    protected function getDefaultOrderStatuses() {
         return array(
             'KEVIN_ORDER_STATUS_STARTED' => array(
+                'send_email' => false,
                 'name' => $this->l('Payment Started'),
                 'color' => 'Lavender',
                 'paid' => false,
@@ -472,16 +809,6 @@ class Kevin extends PaymentModule
             'KEVIN_ORDER_STATUS_PENDING' => array(
                 'name' => $this->l('Payment Pending'),
                 'color' => 'Orchid',
-                'paid' => false,
-            ),
-            'KEVIN_ORDER_STATUS_COMPLETED' => array(
-                'name' => $this->l('Payment Completed'),
-                'color' => 'LimeGreen',
-                'paid' => true,
-            ),
-            'KEVIN_ORDER_STATUS_FAILED' => array(
-                'name' => $this->l('Payment Failed'),
-                'color' => 'OrangeRed',
                 'paid' => false,
             ),
         );
@@ -495,19 +822,20 @@ class Kevin extends PaymentModule
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
-    public function addOrderStatus($statusKey, $statusConfig)
-    {
+    public function addOrderStatus($statusKey, $statusConfig) {
         $orderState = new OrderState();
         $orderState->module_name = $this->name;
         $orderState->color = $statusConfig['color'];
-        $orderState->send_email = true;
+        $orderState->send_email = false;
         $orderState->paid = $statusConfig['paid'];
         $orderState->name = array();
         $orderState->delivery = false;
-        $orderState->logable = true;
+        $orderState->logable = false;
         $orderState->hidden = false;
         foreach (Language::getLanguages() as $language) {
-            $orderState->template[$language['id_lang']] = 'payment';
+            if ($statusKey == 'KEVIN_ORDER_STATUS_COMPLETED') {
+                $orderState->template[$language['id_lang']] = 'payment';
+            }
             $orderState->name[$language['id_lang']] = $statusConfig['name'];
         }
         $orderState->add();
@@ -522,8 +850,7 @@ class Kevin extends PaymentModule
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
-    public function removeOrderStatus($statusKey)
-    {
+    public function removeOrderStatus($statusKey) {
         $order_state_id = Configuration::get($statusKey);
         if ($order_state_id) {
             $orderState = new OrderState($order_state_id);
@@ -531,6 +858,7 @@ class Kevin extends PaymentModule
                 try {
                     $orderState->delete();
                 } catch (\Exception $e) {
+                    
                 }
             }
         }
@@ -541,13 +869,152 @@ class Kevin extends PaymentModule
      *
      * @return bool
      */
-    public function validateClientCredentials()
-    {
+    public function validateClientCredentials() {
         if (empty($this->clientId) || empty($this->clientSecret) || empty($this->creditorName) || empty($this->creditorAccount)) {
+            return false;
+        }
+	
+        return true;
+    }
+
+    /**
+     * Validate cart currency.
+     *
+     * @param $cart
+     * @return bool
+     */
+    public function validateCurrency($cart) {
+        $currency_id = $cart->id_currency;
+        $currency = new Currency((int) $currency_id);
+
+        if (in_array($currency->iso_code, $this->limited_currencies) == false) {
 
             return false;
         }
 
         return true;
     }
+
+    public function hookdisplayOrderConfirmation($params) {
+        if (version_compare(_PS_VERSION_, '1.7.0') < 0) {
+            $order = $params['objOrder'];
+        } else {
+            $order = $params['order'];
+        }
+        $orderid = $order->id;
+        if (!$this->active) {
+            return null;
+        }
+        return $this->orderconfirm($orderid);
+    }
+
+    public function orderconfirm($orderid) {
+
+        $sql = 'SELECT * FROM ' . _DB_PREFIX_ . 'kevin WHERE id_order = \'' . pSQL($orderid) . '\'';
+        if ($row = Db::getInstance()->getRow($sql)) {
+                $order = new Order($row['id_order']);
+                if (!Validate::isLoadedObject($order)) {
+                    Tools::redirect($this->context->link->getPageLink('order'));
+                }
+
+                $customer = new Customer($order->id_customer);
+                if (!Validate::isLoadedObject($customer)) {
+                    Tools::redirect($this->context->link->getPageLink('order'));
+                }
+
+                $statusGroup = Tools::getValue('statusGroup');
+                if ($statusGroup != 'completed') {
+                    if ($statusGroup == 'failed') {
+                        if (!Validate::isLoadedObject($order)) {
+                            Tools::redirect($this->context->link->getPageLink('order'));
+                        }
+                        if ($order) {
+                            $oldCart = new Cart($order->id_cart);
+                            $duplication = $oldCart->duplicate();
+                            if (!$duplication || !Validate::isLoadedObject($duplication['cart'])) {
+                                $this->errors[] = Tools::displayError($this->l(
+                                                        'Sorry. We cannot renew your order.'
+                                ));
+                            } elseif (!$duplication['success']) {
+                                $this->errors[] = Tools::displayError($this->l(
+                                                        'Some items are no longer available, and we are unable to renew your order.'
+                                ));
+                            } else {
+                                $this->context->cookie->id_cart = $duplication['cart']->id;
+                                $context = $this->context;
+                                $context->cart = $duplication['cart'];
+                                CartRule::autoAddToCart($context);
+                                $this->context->cookie->write();
+                            }
+                        }
+                    }
+
+                    $this->smarty->assign(
+                            array(
+                                'group' => $statusGroup
+                            )
+                    );
+                    if (version_compare(_PS_VERSION_, '1.7.0') < 0) {
+                        return $this->display(__FILE__, '/views/templates/hook/payment_return.tpl');
+                    } else {
+                        return $this->fetch('module:kevin/views/templates/hook/payment_return.tpl');
+                    }
+                } else {
+
+                    if (version_compare(_PS_VERSION_, '1.7.0') < 0) {
+                        $customer = new Customer($order->id_customer);
+
+                        $this->smarty->assign(array(
+                            'id_order_formatted' => sprintf('#%06d', $order->id),
+                            'email' => $customer->email,
+                        ));
+                        return $this->display(__FILE__, '/views/templates/hook/order-confirmation.tpl');
+                    } else {
+                        
+                    }
+                }
+
+        }
+    }
+
+    public function hookDisplayAdminOrderTabShip() {
+        return $this->displayadminordertab();
+    }
+
+    public function hookDisplayAdminOrderTabLink() {
+        return $this->displayadminordertab();
+    }
+
+    public function hookDisplayAdminOrderContentShip() {
+        return $this->displayadmintabcontent();
+    }
+
+    public function hookDisplayAdminOrderTabContent() {
+        return $this->displayadmintabcontent();
+    }
+
+    public function displayadminordertab() {
+        $id_order = Tools::getValue('id_order');
+        $order = new Order($id_order);
+
+        if ($order->module == $this->name) {
+            return $this->display(__FILE__, 'views/templates/hook/admin_order_tab_ship.tpl');
+        }
+    }
+
+    public function displayadmintabcontent()
+    {
+        $id_order = Tools::getValue('id_order');
+        $order = new Order($id_order);
+        if ($order->module == $this->name) {
+            $sql = 'SELECT * FROM ' . _DB_PREFIX_ . 'kevin WHERE id_order = \'' . pSQL($id_order) . '\'';
+            if ($row = Db::getInstance()->getRow($sql)) {
+                $this->context->smarty->assign(array(
+                    'payment_id' => $row['payment_id'],
+                ));
+                return $this->display(__FILE__, 'views/templates/hook/admin_order_content_ship.tpl');
+            }
+        }
+    }
+
 }

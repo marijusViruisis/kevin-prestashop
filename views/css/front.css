@@ -11,7 +11,7 @@
 * obtain it through the world-wide-web, please send an email
 * to license@prestashop.com so we can send you a copy immediately.
 *
-*  @author 2020 Tammi <info@tammi.lt>
+*  @author 2020 kevin. <help@kevin.eu>
 *  @copyright kevin.
 *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
 */
@@ -35,4 +35,8 @@ p.payment_module a.kevin_choice:after {
     height: 22px;
     width: 14px;
     color: #777;
+}
+.payment-options img {
+    max-width:130px;
+    height:auto;
 }

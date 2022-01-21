@@ -1,0 +1,13 @@
+{
+    "name": "kevin",
+    "version": "1.6.9",
+    "description": "PrestaShop module for kevin. client.",
+    "author": "kevin.",
+    "license": "MIT",
+    "devDependencies": {
+        "dir-archiver": "^1.1.2"
+    },
+    "scripts": {
+        "archive": "dir-archiver --src . --dest ../kevin.zip --exclude .DS_Store .editorconfig .idea .git .gitignore composer.lock node_modules"
+    }
+}

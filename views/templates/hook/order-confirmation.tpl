@@ -1,4 +1,4 @@
-/*
+{*
 * 2020 kevin.
 *
 * NOTICE OF LICENSE
@@ -14,22 +14,8 @@
 *  @author 2020 kevin. <help@kevin.eu>
 *  @copyright kevin.
 *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
-*/
+*}
 
-.kevin-header .media-left {
-    display: table-cell;
-    vertical-align: top;
-    padding-right: 10px;
-}
-
-.kevin-header .media-body {
-    display: table-cell;
-    vertical-align: top;
-    width: 10000px;
-    overflow: hidden;
-    zoom: 1;
-}
-
-.kevin-header .media-middle {
-    vertical-align: middle;
-}
+<h3>{l s='Your order is confirmed' mod='kevin'}</h3>
+<p>{l s='Your order ID is:' mod='kevin'} <span class="bold">{$id_order_formatted}</span>.</p>
+<p>{l s='An email has been sent to your mail address:' mod='kevin'} {$email}.</p>

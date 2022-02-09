@@ -1,7 +1,7 @@
 <?php
 
 /*
- * 2020 kevin.
+ * 2022 kevin.
  *
  * NOTICE OF LICENSE
  *
@@ -13,7 +13,7 @@
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
  *
- *  @author 2020 kevin. <help@kevin.eu>
+ *  @author 2022 kevin. <help@kevin.eu>
  *  @copyright kevin.
  *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
@@ -45,7 +45,7 @@ class Kevin extends PaymentModule {
     public function __construct() {
         $this->name = 'kevin';
         $this->tab = 'payments_gateways';
-        $this->version = '1.8.10';
+        $this->version = '1.8.11';
         $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
         $this->author = 'kevin.';
         $this->controllers = array('redirect', 'confirm', 'webhook');
@@ -649,6 +649,7 @@ class Kevin extends PaymentModule {
         }
 
         $banks = [];
+
         $bank_data = $this->getBanks();
 		if(!$bank_data){
 			return [];

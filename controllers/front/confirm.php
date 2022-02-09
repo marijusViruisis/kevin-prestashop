@@ -1,7 +1,7 @@
 <?php
 
 /*
- * 2020 kevin.
+ * 2022 kevin.
  *
  * NOTICE OF LICENSE
  *
@@ -13,7 +13,7 @@
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
  *
- *  @author 2020 kevin. <help@kevin.eu>
+ *  @author 2022 kevin. <help@kevin.eu>
  *  @copyright kevin.
  *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */

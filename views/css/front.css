@@ -1,5 +1,5 @@
 /*
-* 2020 kevin.
+* 2022 kevin.
 *
 * NOTICE OF LICENSE
 *
@@ -11,7 +11,7 @@
 * obtain it through the world-wide-web, please send an email
 * to license@prestashop.com so we can send you a copy immediately.
 *
-*  @author 2020 kevin. <help@kevin.eu>
+*  @author 2022 kevin. <help@kevin.eu>
 *  @copyright kevin.
 *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
 */
@@ -36,7 +36,45 @@ p.payment_module a.kevin_choice:after {
     width: 14px;
     color: #777;
 }
+
+.payment-options {
+    margin: 0 5px 5px;
+    padding: 0 10px 10px;
+    /*display: flex;*/
+    /*flex-wrap: wrap;*/
+    align-content: center;
+    justify-content: center;
+    width: auto;
+}
+
 .payment-options img {
-    max-width:130px;
+    max-width:100px;
     height:auto;
+}
+
+.payment-option label {
+    margin-bottom: 0;
+    /**/
+    width:100%;
+
+}
+
+
+.payment-option label span {
+float:left;
+}
+
+
+.payment-option {
+    margin: /*10*/0px 20px;
+    width: auto;
+    display: flex;
+    align-items: center;
+    vertical-align: middle;
+}
+
+body#checkout section.checkout-step .payment-options label {
+display: flex; 
+    align-items: center; 
+    justify-content: space-between;
 }

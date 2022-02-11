@@ -1,7 +1,7 @@
 <?php
 
 /*
- * 2020 kevin.
+ * 2022 kevin.
  *
  * NOTICE OF LICENSE
  *
@@ -13,7 +13,7 @@
  * obtain it through the world-wide-web, please send an email
  * to license@prestashop.com so we can send you a copy immediately.
  *
- *  @author 2020 kevin. <help@kevin.eu>
+ *  @author 2022 kevin. <help@kevin.eu>
  *  @copyright kevin.
  *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
@@ -44,11 +44,11 @@ class KevinRedirectModuleFrontController extends ModuleFrontController {
         $bank_id = Tools::getValue('id');
         $kevinAuth = $this->module->getClient()->auth();
         if ($bank_id == 'card') {
-            $module_name = 'Kevin (Credit/Debit card)';
+            $module_name = 'kevin (Credit/Debit card)';
         } else {
             $bank = $kevinAuth->getBank($bank_id);
             if (!empty($bank['officialName'])) {
-                $module_name = 'Kevin (' . $bank['officialName'] . ')';
+                $module_name = 'kevin (' . $bank['officialName'] . ')';
             } else {
                 $module_name = $this->module->displayName;
             }

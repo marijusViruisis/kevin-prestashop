@@ -14,4 +14,4 @@ Email: help@kevin.eu
 ## License
 
 - **[Academic Free License (AFL 3.0)](http://opensource.org/licenses/afl-3.0.php)**
-- Copyright© 2020 <a href="https://www.kevin.eu/" target="_blank">kevin.</a>
+- Copyright© 2022 <a href="https://www.kevin.eu/" target="_blank">kevin.</a>

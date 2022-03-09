@@ -15,11 +15,27 @@
 *  @copyright kevin.
 *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
 *}
+<head>
+    <link type="text/css" rel="stylesheet" href="{$THEME_CSS_DIR}theme.css">
+</head>
 
-<div>
-	<ul class="alert alert-danger">
-		{foreach from=$errors item='error'}
-			<li>{$error|escape:'htmlall':'UTF-8'}.</li>
-		{/foreach}
-	</ul>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12" style="display: flex; height: 100%; align-items: center;">
+            <div class="error-template">
+                <h1>Oops!</h1>
+                <div class="error-details p-2">
+                    {foreach from=$errors item='error'}
+                        {$error|escape:'htmlall':'UTF-8'}.
+                        <br>
+                    {/foreach}
+                </div>
+                <div class="error-actions">
+                    <a class="btn btn-outline-primary btn-lg" href="/index.php?controller=order&step=1">{l s='Back to cart' mod='kevin'}</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+

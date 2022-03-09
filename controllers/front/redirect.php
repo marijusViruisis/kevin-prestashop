@@ -93,7 +93,17 @@ class KevinRedirectModuleFrontController extends ModuleFrontController {
                 $attr['bankId'] = $bank_id;
             }
         }
-        $response = $kevinPayment->initPayment($attr);
+        try {
+            $response = $kevinPayment->initPayment($attr);
+        }
+        catch (\Exception $e)
+        {
+            $this->context->smarty->assign([
+                'errors' => [$e->getMessage()],
+                'THEME_CSS_DIR' => _THEME_CSS_DIR_
+            ]);
+            return $this->setTemplate('module:kevin/views/templates/front/error.tpl');
+        }
 
         Db::getInstance()->insert('kevin', array(
             'id_order' => (int) $order_id,

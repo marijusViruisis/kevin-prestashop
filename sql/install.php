@@ -17,9 +17,9 @@
 *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
 */
 
-$sql = array();
+$sql = [];
 
-$sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'kevin` (
+$sql[] = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'kevin` (
     `id_kevin` int(11) NOT NULL AUTO_INCREMENT,
     `id_order` int(11) UNSIGNED NOT NULL,
     `payment_id` varchar(64) DEFAULT NULL,
@@ -27,7 +27,7 @@ $sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'kevin` (
     PRIMARY KEY  (`id_kevin`),
     KEY `id_order` (`id_order`),
     KEY `payment_id` (`payment_id`)
-) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;';
+) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;';
 
 foreach ($sql as $query) {
     if (Db::getInstance()->execute($query) == false) {

@@ -18,12 +18,13 @@
  *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 
-class KevinRedirectModuleFrontController extends ModuleFrontController {
-
+class KevinRedirectModuleFrontController extends ModuleFrontController
+{
     /**
      * Process redirect request.
      */
-    public function postProcess() {
+    public function postProcess()
+    {
         if (!$this->module->active) {
             Tools::redirect('index.php?controller=order&step=3');
         }
@@ -36,7 +37,7 @@ class KevinRedirectModuleFrontController extends ModuleFrontController {
             Tools::redirect('index.php?controller=order&step=1');
         }
 
-        $cart_id = intval($cart->id);
+        $cart_id = (int) ($cart->id);
         $payment_status = Configuration::get('KEVIN_ORDER_STATUS_STARTED');
         $message = null;
         $currency_id = $cart->id_currency;
@@ -48,13 +49,13 @@ class KevinRedirectModuleFrontController extends ModuleFrontController {
         } else {
             $bank = $kevinAuth->getBank($bank_id);
             if (!empty($bank['officialName'])) {
-                $module_name = 'kevin (' . $bank['officialName'] . ')';
+                $module_name = 'kevin ('.$bank['officialName'].')';
             } else {
                 $module_name = $this->module->displayName;
             }
         }
 
-        $this->module->validateOrder($cart_id, $payment_status, $cart->getOrderTotal(), $module_name, $message, array(), $currency_id, false, $secure_key);
+        $this->module->validateOrder($cart_id, $payment_status, $cart->getOrderTotal(), $module_name, $message, [], $currency_id, false, $secure_key);
 
         $order_id = Order::getOrderByCartId($cart_id);
         $order = new Order($order_id);
@@ -71,16 +72,16 @@ class KevinRedirectModuleFrontController extends ModuleFrontController {
         $attr = [
             'amount' => number_format($cart->getOrderTotal(), 2, '.', ''),
             'currencyCode' => $currency->iso_code,
-            'description' => sprintf($this->module->l('Order') . ' %s', $order->reference),
+            'description' => sprintf($this->module->l('Order').' %s', $order->reference),
             'identifier' => ['email' => $customer->email],
-            'redirectPreferred' => boolval($redirect_preferred),
-            'Redirect-URL' => $this->context->link->getModuleLink('kevin', 'confirm', array(), true),
-            'Webhook-URL' => $this->context->link->getModuleLink('kevin', 'webhook', array(), true),
+            'redirectPreferred' => (bool) $redirect_preferred,
+            'Redirect-URL' => $this->context->link->getModuleLink('kevin', 'confirm', [], true),
+            'Webhook-URL' => $this->context->link->getModuleLink('kevin', 'webhook', [], true),
         ];
 
         $attr['bankPaymentMethod'] = [
             'creditorName' => $creditor_name,
-            'endToEndId' => strval($order_id),
+            'endToEndId' => (string) $order_id,
             'creditorAccount' => [
                 'iban' => $creditor_account,
             ],
@@ -95,25 +96,24 @@ class KevinRedirectModuleFrontController extends ModuleFrontController {
         }
         try {
             $response = $kevinPayment->initPayment($attr);
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             $this->context->smarty->assign([
                 'errors' => [$e->getMessage()],
-                'THEME_CSS_DIR' => _THEME_CSS_DIR_
+                'THEME_CSS_DIR' => _THEME_CSS_DIR_,
             ]);
+
             return $this->setTemplate('module:kevin/views/templates/front/error.tpl');
         }
 
-        Db::getInstance()->insert('kevin', array(
+        Db::getInstance()->insert('kevin', [
             'id_order' => (int) $order_id,
             'payment_id' => pSQL($response['id']),
             'ip_address' => pSQL(Tools::getRemoteAddr()),
-        ));
+        ]);
 
         $lang = $this->context->language->iso_code;
-        $query = parse_url($response['confirmLink'], PHP_URL_QUERY);
-        $response['confirmLink'] .= ($query) ? '&lang=' . $lang : '?lang=' . $lang;
+        $query = parse_url($response['confirmLink'], \PHP_URL_QUERY);
+        $response['confirmLink'] .= ($query) ? '&lang='.$lang : '?lang='.$lang;
 
         return Tools::redirect($response['confirmLink']);
     }
@@ -121,16 +121,17 @@ class KevinRedirectModuleFrontController extends ModuleFrontController {
     /**
      * @param $message
      * @param bool $description
+     *
      * @throws PrestaShopException
      */
-    protected function displayError($message, $description = false) {
-        $value = '<a href="' . $this->context->link->getPageLink('order', null, null, 'step=3') . '">' . $this->module->l('Payment') . '</a>';
-        $value .= '<span class="navigation-pipe">&gt;</span>' . $this->module->l('Error');
+    protected function displayError($message, $description = false)
+    {
+        $value = '<a href="'.$this->context->link->getPageLink('order', null, null, 'step=3').'">'.$this->module->l('Payment').'</a>';
+        $value .= '<span class="navigation-pipe">&gt;</span>'.$this->module->l('Error');
         $this->context->smarty->assign('path', $value);
 
         array_push($this->errors, $this->module->l($message), $description);
 
         return $this->setTemplate('error.tpl');
     }
-
 }

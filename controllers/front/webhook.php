@@ -18,32 +18,34 @@
  *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 
-class KevinWebhookModuleFrontController extends ModuleFrontController {
-
+class KevinWebhookModuleFrontController extends ModuleFrontController
+{
     /**
      * Process webhook request.
      */
-    public function postProcess() {
+    public function postProcess()
+    {
         if (!$this->module->active) {
             exit;
         }
 
         if (!function_exists('getallheaders')) {
-            function getallheaders() {
+            function getallheaders()
+            {
                 $headers = [];
                 foreach ($_SERVER as $name => $value) {
                     if (substr($name, 0, 5) == 'HTTP_') {
                         $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
                     }
                 }
+
                 return $headers;
             }
         }
 
         $request_body = file_get_contents('php://input');
 
-        if(!\Kevin\SecurityManager::verifySignature(Configuration::get('KEVIN_ENDPOINT_SECRET'), $request_body, getallheaders(), $this->context->link->getModuleLink('kevin', 'webhook', array(), true), 300000))
-        {
+        if (!\Kevin\SecurityManager::verifySignature(Configuration::get('KEVIN_ENDPOINT_SECRET'), $request_body, getallheaders(), $this->context->link->getModuleLink('kevin', 'webhook', [], true), 300000)) {
             status_header(400);
             exit('Signatures do not match.');
         }
@@ -60,14 +62,14 @@ class KevinWebhookModuleFrontController extends ModuleFrontController {
         if (isset($request_array['type']) && $request_array['type'] == 'PAYMENT_REFUND') {
             $payment_id = empty($request_array['paymentId']) ? null : $request_array['paymentId'];
         }
-        $sql = 'SELECT * FROM ' . _DB_PREFIX_ . 'kevin WHERE payment_id = \'' . pSQL($payment_id) . '\'';
+        $sql = 'SELECT * FROM '._DB_PREFIX_.'kevin WHERE payment_id = \''.pSQL($payment_id).'\'';
         if ($row = Db::getInstance()->getRow($sql)) {
             try {
                 $order = new Order($row['id_order']);
                 if (isset($request_array['paymentId']) && $request_array['paymentId'] && isset($request_array['type']) && $request_array['type'] == 'PAYMENT_REFUND' && isset($request_array['statusGroup']) && $request_array['statusGroup']) {
-                    $sql = 'SELECT id_order_state FROM ' . _DB_PREFIX_ . 'order_history WHERE id_order_state = ' . (int) Configuration::get('PS_OS_REFUND') . ' AND id_order = ' . (int) $order->id;
+                    $sql = 'SELECT id_order_state FROM '._DB_PREFIX_.'order_history WHERE id_order_state = '.(int) Configuration::get('PS_OS_REFUND').' AND id_order = '.(int) $order->id;
                     $isExistAccepted = Db::getInstance()->getValue($sql);
-                    if (!$isExistAccepted) { //if already refunded
+                    if (!$isExistAccepted) { // if already refunded
                         $new_history = new OrderHistory();
                         $new_history->id_order = (int) $order->id;
                         $new_history->changeIdOrderState((int) Configuration::get('PS_OS_REFUND'), $order, true);
@@ -104,7 +106,8 @@ class KevinWebhookModuleFrontController extends ModuleFrontController {
         }
     }
 
-    protected function isPaymentCompletedOrFailed($payment_status_group = '') {
+    protected function isPaymentCompletedOrFailed($payment_status_group = '')
+    {
         switch ($payment_status_group) {
             case 'started':
                 $new_os_id = Configuration::get('KEVIN_ORDER_STATUS_STARTED');
@@ -121,7 +124,7 @@ class KevinWebhookModuleFrontController extends ModuleFrontController {
             default:
                 $new_os_id = null;
         }
+
         return (int) $new_os_id;
     }
-
 }

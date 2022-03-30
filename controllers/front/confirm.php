@@ -18,12 +18,13 @@
  *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 
-class KevinConfirmModuleFrontController extends ModuleFrontController {
-
+class KevinConfirmModuleFrontController extends ModuleFrontController
+{
     /**
      * Process confirm request.
      */
-    public function postProcess() {
+    public function postProcess()
+    {
         if (!$this->module->active) {
             Tools::redirect('index');
         }
@@ -31,32 +32,31 @@ class KevinConfirmModuleFrontController extends ModuleFrontController {
         $payment_id = Tools::getValue('paymentId');
 
         if (!$payment_id) {
-
             return $this->displayError($this->module->l('An error occurred. Please contact the merchant for more information.'));
         }
 
-        $sql = 'SELECT * FROM ' . _DB_PREFIX_ . 'kevin WHERE payment_id = \'' . pSQL($payment_id) . '\'';
+        $sql = 'SELECT * FROM '._DB_PREFIX_.'kevin WHERE payment_id = \''.pSQL($payment_id).'\'';
 
         if ($row = Db::getInstance()->getRow($sql)) {
-                $order = new Order($row['id_order']);
-                if (!Validate::isLoadedObject($order)) {
-                    Tools::redirect($this->context->link->getPageLink('order'));
-                }
-                $customer = new Customer($order->id_customer);
+            $order = new Order($row['id_order']);
+            if (!Validate::isLoadedObject($order)) {
+                Tools::redirect($this->context->link->getPageLink('order'));
+            }
+            $customer = new Customer($order->id_customer);
 
-                if (!Validate::isLoadedObject($customer)) {
-                    Tools::redirect($this->context->link->getPageLink('order'));
-                }
+            if (!Validate::isLoadedObject($customer)) {
+                Tools::redirect($this->context->link->getPageLink('order'));
+            }
 
-                $params = array(
+            $params = [
                     'id_cart' => $order->id_cart,
                     'id_module' => $this->module->id,
                     'id_order' => $order->id,
                     'key' => $customer->secure_key,
-                    'statusGroup' => Tools::getValue('statusGroup')
-                );
+                    'statusGroup' => Tools::getValue('statusGroup'),
+                ];
 
-                Tools::redirect($this->context->link->getPageLink('order-confirmation', null, null, $params));
+            Tools::redirect($this->context->link->getPageLink('order-confirmation', null, null, $params));
         }
 
         return $this->displayError($this->module->l('An error occurred. Please contact the merchant for more information.'));
@@ -65,16 +65,17 @@ class KevinConfirmModuleFrontController extends ModuleFrontController {
     /**
      * @param $message
      * @param bool $description
+     *
      * @throws PrestaShopException
      */
-    protected function displayError($message, $description = false) {
-        $value = '<a href="' . $this->context->link->getPageLink('order') . '">' . $this->module->l('Payment') . '</a>';
-        $value .= '<span class="navigation-pipe">&gt;</span>' . $this->module->l('Error');
+    protected function displayError($message, $description = false)
+    {
+        $value = '<a href="'.$this->context->link->getPageLink('order').'">'.$this->module->l('Payment').'</a>';
+        $value .= '<span class="navigation-pipe">&gt;</span>'.$this->module->l('Error');
         $this->context->smarty->assign('path', $value);
 
         array_push($this->errors, $this->module->l($message), $description);
 
         return $this->setTemplate('error.tpl');
     }
-
 }

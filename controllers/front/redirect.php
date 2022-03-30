@@ -25,6 +25,9 @@ class KevinRedirectModuleFrontController extends ModuleFrontController
      */
     public function postProcess()
     {
+        $this->display_column_left = false;
+        $this->display_column_right = false;
+
         if (!$this->module->active) {
             Tools::redirect('index.php?controller=order&step=3');
         }
@@ -101,8 +104,11 @@ class KevinRedirectModuleFrontController extends ModuleFrontController
                 'errors' => [$e->getMessage()],
                 'THEME_CSS_DIR' => _THEME_CSS_DIR_,
             ]);
-
-            return $this->setTemplate('module:kevin/views/templates/front/error.tpl');
+            if (version_compare(PS_VERSION, '1.7.0') < 0) {
+                return $this->setTemplate('error.tpl');
+            } else {
+                return $this->setTemplate('module:kevin/views/templates/front/error.tpl');
+            }
         }
 
         Db::getInstance()->insert('kevin', [

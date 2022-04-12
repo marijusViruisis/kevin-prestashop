@@ -88,13 +88,16 @@ class KevinWebhookModuleFrontController extends ModuleFrontController
                             exit;
                         }
                         $old_os_id = $order->getCurrentOrderState()->id;
-                        $new_os_id = null;
                         $new_os_id = $this->isPaymentCompletedOrFailed($statusgroup);
                         if (!$new_os_id) {
                             exit;
                         } else {
                             if ($old_os_id != $new_os_id) {
-                                $order->setCurrentState($new_os_id);
+                                $sql = 'SELECT id_order_state FROM ' . DB_PREFIX . 'order_history WHERE id_order_state = ' . (int) $new_os_id . ' AND id_order = ' . (int) $order->id;
+                                $isExistAccepted = Db::getInstance()->getValue($sql);
+                                if (!$isExistAccepted) {
+                                    $order->setCurrentState($new_os_id);
+                                }
                             }
                         }
                     }

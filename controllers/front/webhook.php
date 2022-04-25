@@ -93,10 +93,18 @@ class KevinWebhookModuleFrontController extends ModuleFrontController
                             exit;
                         } else {
                             if ($old_os_id != $new_os_id) {
-                                $sql = 'SELECT id_order_state FROM ' . DB_PREFIX . 'order_history WHERE id_order_state = ' . (int) $new_os_id . ' AND id_order = ' . (int) $order->id;
-                                $isExistAccepted = Db::getInstance()->getValue($sql);
-                                if (!$isExistAccepted) {
-                                    $order->setCurrentState($new_os_id);
+                                $sql = 'SELECT id_order_state FROM '._DB_PREFIX_.'order_history WHERE id_order_state = '.(int) $new_os_id.' AND id_order = '.(int) $order->id;
+                                $isStatusDuplicate = Db::getInstance()->getValue($sql);
+                                if (!$isStatusDuplicate) {
+                                    $statusIdCompleted = (int) Configuration::get('PS_OS_PAYMENT');
+                                    $statusIdPreparation = (int) Configuration::get('PS_OS_PREPARATION');
+                                    $statusIdShipped = (int) Configuration::get('PS_OS_SHIPPING');
+                                    $statusIdDelivered = (int) Configuration::get('PS_OS_DELIVERED');
+                                    $sql = 'SELECT id_order_state FROM '._DB_PREFIX_.'order_history WHERE id_order_state IN ('.$statusIdCompleted.','.$statusIdPreparation.','.$statusIdShipped.','.$statusIdDelivered.') AND id_order = '.(int) $order->id;
+                                    $wasStatusCompleted = Db::getInstance()->getValue($sql);
+                                    if (!$wasStatusCompleted) {
+                                        $order->setCurrentState($new_os_id);
+                                    }
                                 }
                             }
                         }

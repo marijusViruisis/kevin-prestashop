@@ -97,8 +97,6 @@ class Kevin extends PaymentModule
     {
         $iso_code = Country::getIsoById(Configuration::get('PS_COUNTRY_DEFAULT'));
 
-
-
         include __DIR__.'/sql/install.php';
 
         $order_statuses = $this->getDefaultOrderStatuses();
@@ -120,8 +118,6 @@ class Kevin extends PaymentModule
                 $this->registerHook('hookActionOrderSlipAdd') &&
                 $this->registerHook('displayOrderConfirmation');
     }
-
-
 
     /**
      * Process module uninstall.
@@ -670,7 +666,6 @@ class Kevin extends PaymentModule
             return [];
         }
 
-
         if (!$this->validateClientCredentials()) {
             return [];
         }
@@ -844,8 +839,6 @@ class Kevin extends PaymentModule
 
         return true;
     }
-
-
 
     public function hookdisplayOrderConfirmation($params)
     {

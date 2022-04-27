@@ -96,11 +96,14 @@ class KevinWebhookModuleFrontController extends ModuleFrontController
                                 $sql = 'SELECT id_order_state FROM '._DB_PREFIX_.'order_history WHERE id_order_state = '.(int) $new_os_id.' AND id_order = '.(int) $order->id;
                                 $isStatusDuplicate = Db::getInstance()->getValue($sql);
                                 if (!$isStatusDuplicate) {
-                                    $statusIdCompleted = (int) Configuration::get('PS_OS_PAYMENT');
-                                    $statusIdPreparation = (int) Configuration::get('PS_OS_PREPARATION');
-                                    $statusIdShipped = (int) Configuration::get('PS_OS_SHIPPING');
-                                    $statusIdDelivered = (int) Configuration::get('PS_OS_DELIVERED');
-                                    $sql = 'SELECT id_order_state FROM '._DB_PREFIX_.'order_history WHERE id_order_state IN ('.$statusIdCompleted.','.$statusIdPreparation.','.$statusIdShipped.','.$statusIdDelivered.') AND id_order = '.(int) $order->id;
+                                    $immutableStatuses = implode(',', [
+                                        (int) Configuration::get('PS_OS_PAYMENT'),
+                                        (int) Configuration::get('PS_OS_PREPARATION'),
+                                        (int) Configuration::get('PS_OS_SHIPPING'),
+                                        (int) Configuration::get('PS_OS_DELIVERED'),
+                                    ]);
+
+                                    $sql = 'SELECT id_order_state FROM '._DB_PREFIX_.'order_history WHERE id_order_state IN ('.$immutableStatuses.') AND id_order = '.(int) $order->id;
                                     $wasStatusCompleted = Db::getInstance()->getValue($sql);
                                     if (!$wasStatusCompleted) {
                                         $order->setCurrentState($new_os_id);

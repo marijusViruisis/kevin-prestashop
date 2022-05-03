@@ -21,7 +21,7 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-md-12" style="display: flex; height: 100%; align-items: center;">
+        <div class="col-md-12" style="display: flex; align-items: center;">
             <div class="error-template">
                 <h1>Oops!</h1>
                 <div class="error-details p-2">

@@ -59,9 +59,6 @@ class Kevin extends PaymentModule
 
         $this->confirmUninstall = $this->l('Are you sure you would like to uninstall?');
 
-        $this->limited_countries = ['AT', 'BE', 'BG', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GR', 'HR', 'HU', 'IT', 'LT', 'LU', 'LV', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK'];
-        $this->limited_currencies = ['EUR', 'PLN', 'BGN', 'HRK', 'CZK', 'DKK', 'HUF', 'RON', 'SEK', 'CHF'];
-
         $this->currencies = true;
         $this->currencies_mode = 'checkbox';
 
@@ -100,12 +97,6 @@ class Kevin extends PaymentModule
     {
         $iso_code = Country::getIsoById(Configuration::get('PS_COUNTRY_DEFAULT'));
 
-        if (in_array($iso_code, $this->limited_countries) == false) {
-            $this->_errors[] = $this->l('This module is not available in your country');
-
-            return false;
-        }
-
         include __DIR__.'/sql/install.php';
 
         $order_statuses = $this->getDefaultOrderStatuses();
@@ -125,53 +116,7 @@ class Kevin extends PaymentModule
                 $this->registerHook('displayAdminOrderTabLink') &&
                 $this->registerHook('displayAdminOrderTabContent') &&
                 $this->registerHook('hookActionOrderSlipAdd') &&
-                $this->registerHook('displayOrderConfirmation') &&
-                $this->addCheckboxCountryRestrictionsForModule() &&
-                $this->addCheckboxCurrencyRestrictionsForModule();
-    }
-
-    public function addCheckboxCountryRestrictionsForModule(array $shops = [])
-    {
-        $countries = [];
-        foreach ($this->limited_countries as $limited_country) {
-            $countries[] = ['id_country' => Country::getByIso($limited_country)];
-        }
-
-        return Country::addModuleRestrictions($shops, $countries, [['id_module' => (int) $this->id]]);
-    }
-
-    public function addCheckboxCurrencyRestrictionsForModule(array $shops = [])
-    {
-        if (!$shops) {
-            $shops = Shop::getShops(true, null, true);
-        }
-
-        $modules = [['id_module' => (int) $this->id]];
-
-        $currencies = [];
-        foreach ($this->limited_currencies as $limited_currency) {
-            $id_currency = Currency::getIdByIsoCode($limited_currency);
-            if ($id_currency) {
-                $currencies[] = ['id_currency' => $id_currency];
-            }
-        }
-
-        $sql = false;
-        foreach ($shops as $id_shop) {
-            foreach ($currencies as $currency) {
-                foreach ($modules as $module) {
-                    $sql .= '('.(int) $module['id_module'].', '.(int) $id_shop.', '.(int) $currency['id_currency'].'),';
-                }
-            }
-        }
-
-        if ($sql) {
-            $sql = 'INSERT IGNORE INTO `'._DB_PREFIX_.'module_currency` (`id_module`, `id_shop`, `id_currency`) VALUES '.rtrim($sql, ',');
-
-            return Db::getInstance()->execute($sql);
-        } else {
-            return true;
-        }
+                $this->registerHook('displayOrderConfirmation');
     }
 
     /**
@@ -649,13 +594,6 @@ class Kevin extends PaymentModule
      */
     public function hookPayment($params)
     {
-        $currency_id = $params['cart']->id_currency;
-        $currency = new Currency((int) $currency_id);
-
-        if (in_array($currency->iso_code, $this->limited_currencies) == false) {
-            return false;
-        }
-
         if (!$this->validateClientCredentials()) {
             return false;
         }
@@ -725,10 +663,6 @@ class Kevin extends PaymentModule
     public function hookPaymentOptions($params)
     {
         if (!$this->active) {
-            return [];
-        }
-
-        if (!$this->validateCurrency($params['cart'])) {
             return [];
         }
 
@@ -900,25 +834,6 @@ class Kevin extends PaymentModule
     public function validateClientCredentials()
     {
         if (empty($this->clientId) || empty($this->clientSecret) || empty($this->creditorName) || empty($this->creditorAccount)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Validate cart currency.
-     *
-     * @param $cart
-     *
-     * @return bool
-     */
-    public function validateCurrency($cart)
-    {
-        $currency_id = $cart->id_currency;
-        $currency = new Currency((int) $currency_id);
-
-        if (in_array($currency->iso_code, $this->limited_currencies) == false) {
             return false;
         }
 

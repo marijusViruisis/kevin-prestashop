@@ -88,13 +88,27 @@ class KevinWebhookModuleFrontController extends ModuleFrontController
                             exit;
                         }
                         $old_os_id = $order->getCurrentOrderState()->id;
-                        $new_os_id = null;
                         $new_os_id = $this->isPaymentCompletedOrFailed($statusgroup);
                         if (!$new_os_id) {
                             exit;
                         } else {
                             if ($old_os_id != $new_os_id) {
-                                $order->setCurrentState($new_os_id);
+                                $sql = 'SELECT id_order_state FROM '._DB_PREFIX_.'order_history WHERE id_order_state = '.(int) $new_os_id.' AND id_order = '.(int) $order->id;
+                                $isStatusDuplicate = Db::getInstance()->getValue($sql);
+                                if (!$isStatusDuplicate) {
+                                    $immutableStatuses = implode(',', [
+                                        (int) Configuration::get('PS_OS_PAYMENT'),
+                                        (int) Configuration::get('PS_OS_PREPARATION'),
+                                        (int) Configuration::get('PS_OS_SHIPPING'),
+                                        (int) Configuration::get('PS_OS_DELIVERED'),
+                                    ]);
+
+                                    $sql = 'SELECT id_order_state FROM '._DB_PREFIX_.'order_history WHERE id_order_state IN ('.$immutableStatuses.') AND id_order = '.(int) $order->id;
+                                    $wasStatusCompleted = Db::getInstance()->getValue($sql);
+                                    if (!$wasStatusCompleted) {
+                                        $order->setCurrentState($new_os_id);
+                                    }
+                                }
                             }
                         }
                     }

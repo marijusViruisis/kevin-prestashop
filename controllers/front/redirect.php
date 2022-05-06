@@ -104,6 +104,9 @@ class KevinRedirectModuleFrontController extends ModuleFrontController
                 'errors' => [$e->getMessage()],
                 'THEME_CSS_DIR' => _THEME_CSS_DIR_,
             ]);
+
+            $this->errors[] = $e->getMessage();
+
             if (version_compare(PS_VERSION, '1.7.0', '<')) {
                 return $this->setTemplate('error.tpl');
             } else {

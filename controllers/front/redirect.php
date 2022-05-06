@@ -18,6 +18,8 @@
  *  @license http://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 
+use Kevin\KevinException;
+
 class KevinRedirectModuleFrontController extends ModuleFrontController
 {
     /**
@@ -99,11 +101,14 @@ class KevinRedirectModuleFrontController extends ModuleFrontController
         }
         try {
             $response = $kevinPayment->initPayment($attr);
-        } catch (\Exception $e) {
+        } catch (KevinException $e) {
             $this->context->smarty->assign([
                 'errors' => [$e->getMessage()],
                 'THEME_CSS_DIR' => _THEME_CSS_DIR_,
             ]);
+
+            $this->errors[] = $e->getMessage();
+
             if (version_compare(PS_VERSION, '1.7.0', '<')) {
                 return $this->setTemplate('error.tpl');
             } else {

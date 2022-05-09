@@ -101,6 +101,7 @@ class KevinWebhookModuleFrontController extends ModuleFrontController
                                         (int) Configuration::get('PS_OS_PREPARATION'),
                                         (int) Configuration::get('PS_OS_SHIPPING'),
                                         (int) Configuration::get('PS_OS_DELIVERED'),
+                                        (int) Configuration::get('PS_OS_CANCELED'),
                                     ]);
 
                                     $sql = 'SELECT id_order_state FROM '._DB_PREFIX_.'order_history WHERE id_order_state IN ('.$immutableStatuses.') AND id_order = '.(int) $order->id;

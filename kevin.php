@@ -46,7 +46,7 @@ class Kevin extends PaymentModule
     {
         $this->name = 'kevin';
         $this->tab = 'payments_gateways';
-        $this->version = '1.8.12';
+        $this->version = '1.8.13';
         $this->ps_versions_compliancy = ['min' => '1.6', 'max' => _PS_VERSION_];
         $this->author = 'kevin.';
         $this->controllers = ['redirect', 'confirm', 'webhook'];
@@ -289,11 +289,28 @@ class Kevin extends PaymentModule
                 ],
                 'input' => [
                     [
-                        'col' => 6,
                         'type' => 'switch',
                         'label' => $this->l('Redirect Preferred'),
                         'name' => 'KEVIN_REDIRECT_PREFERRED',
                         'desc' => $this->l('Redirect user directly to bank.'),
+                        'values' => [
+                            [
+                                'id' => 'active_on',
+                                'value' => 1,
+                                'label' => $this->l('Enabled'),
+                            ],
+                            [
+                                'id' => 'active_off',
+                                'value' => 0,
+                                'label' => $this->l('Disabled'),
+                            ],
+                        ],
+                    ],
+                    [
+                        'type' => 'switch',
+                        'label' => $this->l('Cart duplicate'),
+                        'name' => 'KEVIN_CART_DUPLICATE',
+                        'desc' => $this->l('Duplicates cart after failed payment.'),
                         'values' => [
                             [
                                 'id' => 'active_on',
@@ -350,6 +367,11 @@ class Kevin extends PaymentModule
             $redirectPreferred = 1;
         }
 
+        $cartDuplicate = Tools::getValue('KEVIN_CART_DUPLICATE', Configuration::get('KEVIN_CART_DUPLICATE'));
+        if ($cartDuplicate === false) {
+            $cartDuplicate = 0;
+        }
+
         return [
             'KEVIN_CLIENT_ID' => Tools::getValue('KEVIN_CLIENT_ID', Configuration::get('KEVIN_CLIENT_ID')),
             'KEVIN_CLIENT_SECRET' => Tools::getValue('KEVIN_CLIENT_SECRET', Configuration::get('KEVIN_CLIENT_SECRET')),
@@ -357,6 +379,7 @@ class Kevin extends PaymentModule
             'KEVIN_CREDITOR_NAME' => Tools::getValue('KEVIN_CREDITOR_NAME', Configuration::get('KEVIN_CREDITOR_NAME')),
             'KEVIN_CREDITOR_ACCOUNT' => Tools::getValue('KEVIN_CREDITOR_ACCOUNT', Configuration::get('KEVIN_CREDITOR_ACCOUNT')),
             'KEVIN_REDIRECT_PREFERRED' => $redirectPreferred,
+            'KEVIN_CART_DUPLICATE' => $cartDuplicate,
         ];
     }
 
@@ -368,14 +391,21 @@ class Kevin extends PaymentModule
         if (((bool) Tools::isSubmit('submitKevinModule1')) === true) {
             if (!Tools::getValue('KEVIN_CLIENT_ID')) {
                 $this->_postErrors[] = $this->l('Client ID is required.');
-            } elseif (!Tools::getValue('KEVIN_CLIENT_SECRET')) {
+            }
+            if (!Tools::getValue('KEVIN_CLIENT_SECRET')) {
                 $this->_postErrors[] = $this->l('Client Secret is required.');
             }
         }
         if (((bool) Tools::isSubmit('submitKevinModule2')) === true) {
             if (!Tools::getValue('KEVIN_CREDITOR_NAME')) {
                 $this->_postErrors[] = $this->l('Company Name is required.');
-            } elseif (!Tools::getValue('KEVIN_CREDITOR_ACCOUNT')) {
+            }
+            $matches = [];
+            preg_match('/[a-zA-Z0-9 ]*/', Tools::getValue('KEVIN_CREDITOR_NAME'), $matches);
+            if (!in_array(Tools::getValue('KEVIN_CREDITOR_NAME'), $matches)) {
+                $this->_postErrors[] = $this->l('Company Name: Please use only letters (a-z or A-Z), numbers (0-9) or spaces only in this field.');
+            }
+            if (!Tools::getValue('KEVIN_CREDITOR_ACCOUNT')) {
                 $this->_postErrors[] = $this->l('Company Bank Account is required.');
             }
         }
@@ -871,7 +901,7 @@ class Kevin extends PaymentModule
 
             $statusGroup = Tools::getValue('statusGroup');
             if ($statusGroup != 'completed') {
-                if ($statusGroup == 'failed') {
+                if ($statusGroup == 'failed' && Configuration::get('KEVIN_CART_DUPLICATE')) {
                     if (!Validate::isLoadedObject($order)) {
                         Tools::redirect($this->context->link->getPageLink('order'));
                     }

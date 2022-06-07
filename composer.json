@@ -2,7 +2,7 @@
     "name": "getkevin/kevin-prestashop",
     "description": "PrestaShop module for kevin. client.",
     "type": "prestashop-module",
-    "version": "1.8.12",
+    "version": "1.9.0",
     "license": "MIT",
     "authors": [
         {
@@ -25,4 +25,4 @@
         "ext-json": "*",
         "getkevin/kevin-php": "^0.15.1"
     }
-} 
+}

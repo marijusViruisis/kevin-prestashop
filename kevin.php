@@ -621,7 +621,7 @@ class Kevin extends PaymentModule
                 $banks[] = [
                     'id' => 'card',
                     'title' => 'Credit/Debit card',
-                    'logo' => Context::getContext()->shop->getBaseURL(true).'modules/kevin/views/img/card.png',
+                    'logo' => 'https://cdn.kevin.eu/banks/images/VISA_MC.png',
                     'action' => $this->context->link->getModuleLink($this->name, 'redirect', ['id' => 'card'], true),
                 ];
             }
@@ -694,7 +694,7 @@ class Kevin extends PaymentModule
             $option = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
             $option->setModuleName($this->name);
             $option->setCallToActionText('Credit/Debit card');
-            $option->setLogo(Context::getContext()->shop->getBaseURL(true).'modules/kevin/views/img/card.png');
+            $option->setLogo('https://cdn.kevin.eu/banks/images/VISA_MC.png');
             $option->setAction($this->context->link->getModuleLink($this->name, 'redirect', ['id' => 'card'], true));
             $options[] = $option;
         }

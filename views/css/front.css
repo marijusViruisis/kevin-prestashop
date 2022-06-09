@@ -22,6 +22,15 @@ p.payment_module a.kevin_choice {
     background-repeat: no-repeat;
     text-decoration: none;
 }
+p.payment_module a.kevin_choice:not(.disabled) {
+    cursor: pointer;
+}
+p.payment_module a.kevin_choice.disabled {
+    cursor: not-allowed;
+}
+p.payment_module a.kevin_choice.loading {
+    cursor: progress;
+}
 
 p.payment_module a.kevin_choice:after {
     display: block;
@@ -35,6 +44,21 @@ p.payment_module a.kevin_choice:after {
     height: 22px;
     width: 14px;
     color: #777;
+}
+
+p.payment_module a.kevin_choice.loading:after {
+    content: "\f110";
+    animation: kevin_rotation 2s infinite linear;
+    width: auto;
+}
+
+@keyframes kevin_rotation {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(359deg);
+    }
 }
 
 .payment-options {
@@ -61,7 +85,7 @@ p.payment_module a.kevin_choice:after {
 
 
 .payment-option label span {
-float:left;
+    float:left;
 }
 
 
@@ -74,7 +98,7 @@ float:left;
 }
 
 body#checkout section.checkout-step .payment-options label {
-display: flex; 
-    align-items: center; 
+    display: flex;
+    align-items: center;
     justify-content: space-between;
 }

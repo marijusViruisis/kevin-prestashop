@@ -109,7 +109,7 @@ class KevinRedirectModuleFrontController extends ModuleFrontController
 
             $this->errors[] = $e->getMessage();
 
-            if (version_compare(PS_VERSION, '1.7.0', '<')) {
+            if (version_compare(_PS_VERSION_, '1.7.0', '<')) {
                 return $this->setTemplate('error.tpl');
             } else {
                 return $this->setTemplate('module:kevin/views/templates/front/error.tpl');

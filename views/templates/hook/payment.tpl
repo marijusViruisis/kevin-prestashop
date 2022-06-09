@@ -20,8 +20,8 @@
 	<div class="col-xs-12">
 		{foreach $banks as $bank}
 			<p class="payment_module kevin_payment_button">
-				<a class="kevin_choice" href="{$bank['action']|escape:'htmlall':'UTF-8'}" style="background-image:url('{$bank['logo']|escape:'htmlall':'UTF-8'}')">
-					{$bank['title']}<br><span>{l s='Redirect to bank login' mod='kevin'}</span>
+				<a class="kevin_choice" data-url="{$bank['action']|escape:'htmlall':'UTF-8'}" onClick="kevinProceedToPaymentUrl(this)" style="background-image:url('{$bank['logo']|escape:'htmlall':'UTF-8'}')">
+					{$bank['title']}{if $bank['id'] neq 'card'}<br><span>{l s='Redirect to bank login' mod='kevin'}</span>{/if}
 				</a>
 			</p>
 		{/foreach}

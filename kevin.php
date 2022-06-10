@@ -46,7 +46,7 @@ class Kevin extends PaymentModule
     {
         $this->name = 'kevin';
         $this->tab = 'payments_gateways';
-        $this->version = '1.10.0';
+        $this->version = '1.9.2';
         $this->ps_versions_compliancy = ['min' => '1.6', 'max' => _PS_VERSION_];
         $this->author = 'kevin.';
         $this->controllers = ['redirect', 'confirm', 'webhook'];

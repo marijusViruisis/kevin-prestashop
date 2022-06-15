@@ -2,7 +2,7 @@
     "name": "getkevin/kevin-prestashop",
     "description": "PrestaShop module for kevin. client.",
     "type": "prestashop-module",
-    "version": "1.9.1",
+    "version": "1.9.2",
     "license": "MIT",
     "authors": [
         {

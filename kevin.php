@@ -46,7 +46,7 @@ class Kevin extends PaymentModule
     {
         $this->name = 'kevin';
         $this->tab = 'payments_gateways';
-        $this->version = '1.9.2';
+        $this->version = '1.9.3';
         $this->ps_versions_compliancy = ['min' => '1.6', 'max' => _PS_VERSION_];
         $this->author = 'kevin.';
         $this->controllers = ['redirect', 'confirm', 'webhook'];
@@ -398,6 +398,7 @@ class Kevin extends PaymentModule
     public function hookHeader()
     {
         $this->context->controller->addCSS($this->_path.'views/css/front.css');
+        $this->context->controller->addJs($this->_path."views/js/front.js?v={$this->version}");
     }
 
     public function hookActionOrderSlipAdd($params)
@@ -597,8 +598,6 @@ class Kevin extends PaymentModule
         if (!$this->validateClientCredentials()) {
             return false;
         }
-
-        $this->context->controller->addJs($this->_path."views/js/front.js?v={$this->version}");
 
         $banks = [];
 

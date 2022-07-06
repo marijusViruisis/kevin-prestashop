@@ -105,18 +105,18 @@ class Kevin extends PaymentModule
         }
 
         return parent::install() &&
-                $this->registerHook('header') &&
-                $this->registerHook('backOfficeHeader') &&
-                $this->registerHook('payment') &&
-                $this->registerHook('orderConfirmation') &&
-                $this->registerHook('paymentOptions') &&
-                $this->registerHook('displayAdminOrderContentShip') &&
-                $this->registerHook('displayBackOfficeHeader') &&
-                $this->registerHook('displayAdminOrderTabShip') &&
-                $this->registerHook('displayAdminOrderTabLink') &&
-                $this->registerHook('displayAdminOrderTabContent') &&
-                $this->registerHook('hookActionOrderSlipAdd') &&
-                $this->registerHook('displayOrderConfirmation');
+            $this->registerHook('header') &&
+            $this->registerHook('backOfficeHeader') &&
+            $this->registerHook('payment') &&
+            $this->registerHook('orderConfirmation') &&
+            $this->registerHook('paymentOptions') &&
+            $this->registerHook('displayAdminOrderContentShip') &&
+            $this->registerHook('displayBackOfficeHeader') &&
+            $this->registerHook('displayAdminOrderTabShip') &&
+            $this->registerHook('displayAdminOrderTabLink') &&
+            $this->registerHook('displayAdminOrderTabContent') &&
+            $this->registerHook('hookActionOrderSlipAdd') &&
+            $this->registerHook('displayOrderConfirmation');
     }
 
     /**
@@ -143,13 +143,13 @@ class Kevin extends PaymentModule
         include __DIR__.'/sql/uninstall.php';
 
         return parent::uninstall() &&
-                $this->unregisterHook('header') &&
-                $this->unregisterHook('backOfficeHeader') &&
-                $this->unregisterHook('payment') &&
-                $this->unregisterHook('orderConfirmation') &&
-                $this->unregisterHook('paymentOptions') &&
-                $this->unregisterHook('displayOrderConfirmation') &&
-                $this->unregisterHook('hookActionOrderSlipAdd');
+            $this->unregisterHook('header') &&
+            $this->unregisterHook('backOfficeHeader') &&
+            $this->unregisterHook('payment') &&
+            $this->unregisterHook('orderConfirmation') &&
+            $this->unregisterHook('paymentOptions') &&
+            $this->unregisterHook('displayOrderConfirmation') &&
+            $this->unregisterHook('hookActionOrderSlipAdd');
     }
 
     public function reset()
@@ -343,7 +343,7 @@ class Kevin extends PaymentModule
         $helper->identifier = $this->identifier;
         $helper->submit_action = 'submitKevinModule';
         $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false)
-                .'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
+            .'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
 
         $helper->tpl_vars = [
@@ -388,26 +388,23 @@ class Kevin extends PaymentModule
      */
     protected function postValidation()
     {
-        if (((bool) Tools::isSubmit('submitKevinModule1')) === true) {
-            if (!Tools::getValue('KEVIN_CLIENT_ID')) {
-                $this->_postErrors[] = $this->l('Client ID is required.');
-            }
-            if (!Tools::getValue('KEVIN_CLIENT_SECRET')) {
-                $this->_postErrors[] = $this->l('Client Secret is required.');
-            }
+        if (!Tools::getValue('KEVIN_CLIENT_ID')) {
+            $this->_postErrors[] = $this->l('Client ID is required.');
         }
-        if (((bool) Tools::isSubmit('submitKevinModule2')) === true) {
-            if (!Tools::getValue('KEVIN_CREDITOR_NAME')) {
-                $this->_postErrors[] = $this->l('Company Name is required.');
-            }
-            $matches = [];
-            preg_match('/[a-zA-Z0-9 ]*/', Tools::getValue('KEVIN_CREDITOR_NAME'), $matches);
-            if (!in_array(Tools::getValue('KEVIN_CREDITOR_NAME'), $matches)) {
-                $this->_postErrors[] = $this->l('Company Name: Please use only letters (a-z or A-Z), numbers (0-9) or spaces only in this field.');
-            }
-            if (!Tools::getValue('KEVIN_CREDITOR_ACCOUNT')) {
-                $this->_postErrors[] = $this->l('Company Bank Account is required.');
-            }
+        if (!Tools::getValue('KEVIN_CLIENT_SECRET')) {
+            $this->_postErrors[] = $this->l('Client Secret is required.');
+        }
+        if (!Tools::getValue('KEVIN_CREDITOR_NAME')) {
+            $this->_postErrors[] = $this->l('Company Name is required.');
+        }
+        if (!Tools::getValue('KEVIN_CREDITOR_ACCOUNT')) {
+            $this->_postErrors[] = $this->l('Company Bank Account is required.');
+        }
+
+        $matches = [];
+        preg_match('/[a-zA-Z0-9 ]*/', Tools::getValue('KEVIN_CREDITOR_NAME'), $matches);
+        if (!in_array(Tools::getValue('KEVIN_CREDITOR_NAME'), $matches)) {
+            $this->_postErrors[] = $this->l('Company Name: Please use only letters (a-z or A-Z), numbers (0-9) or spaces only in this field.');
         }
     }
 
@@ -910,12 +907,12 @@ class Kevin extends PaymentModule
                         $duplication = $oldCart->duplicate();
                         if (!$duplication || !Validate::isLoadedObject($duplication['cart'])) {
                             $this->errors[] = Tools::displayError($this->l(
-                                                        'Sorry. We cannot renew your order.'
-                                ));
+                                'Sorry. We cannot renew your order.'
+                            ));
                         } elseif (!$duplication['success']) {
                             $this->errors[] = Tools::displayError($this->l(
-                                                        'Some items are no longer available, and we are unable to renew your order.'
-                                ));
+                                'Some items are no longer available, and we are unable to renew your order.'
+                            ));
                         } else {
                             $this->context->cookie->id_cart = $duplication['cart']->id;
                             $context = $this->context;
@@ -927,10 +924,10 @@ class Kevin extends PaymentModule
                 }
 
                 $this->smarty->assign(
-                            [
-                                'group' => $statusGroup,
-                            ]
-                    );
+                    [
+                        'group' => $statusGroup,
+                    ]
+                );
                 if (version_compare(_PS_VERSION_, '1.7.0') < 0) {
                     return $this->display(__FILE__, '/views/templates/hook/payment_return.tpl');
                 } else {
@@ -941,9 +938,9 @@ class Kevin extends PaymentModule
                     $customer = new Customer($order->id_customer);
 
                     $this->smarty->assign([
-                            'id_order_formatted' => sprintf('#%06d', $order->id),
-                            'email' => $customer->email,
-                        ]);
+                        'id_order_formatted' => sprintf('#%06d', $order->id),
+                        'email' => $customer->email,
+                    ]);
 
                     return $this->display(__FILE__, '/views/templates/hook/order-confirmation.tpl');
                 } else {

@@ -1,7 +1,7 @@
 <?php
 
 global $_MODULE;
-$_MODULE = array();
+$_MODULE = [];
 $_MODULE['<{kevin}prestashop>kevin_07e71f9ec967d243b32af9407ffd94cd'] = 'kevin.';
 $_MODULE['<{kevin}prestashop>kevin_203185b0731f949941e33ff1b4fac068'] = 'kevin. es una empresa de infraestructuras de pago que ofrece servicios de iniciación de pagos en la UE y el EEE.';
 $_MODULE['<{kevin}prestashop>kevin_35978e9d51ed26fa7bfa472de4a9da04'] = '¿Está seguro de que desea desinstalar?';

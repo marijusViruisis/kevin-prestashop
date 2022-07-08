@@ -46,7 +46,7 @@ class Kevin extends PaymentModule
     {
         $this->name = 'kevin';
         $this->tab = 'payments_gateways';
-        $this->version = '1.8.13';
+        $this->version = '1.9.4';
         $this->ps_versions_compliancy = ['min' => '1.6', 'max' => _PS_VERSION_];
         $this->author = 'kevin.';
         $this->controllers = ['redirect', 'confirm', 'webhook'];
@@ -425,6 +425,7 @@ class Kevin extends PaymentModule
     public function hookHeader()
     {
         $this->context->controller->addCSS($this->_path.'views/css/front.css');
+        $this->context->controller->addJs($this->_path."views/js/front.js?v={$this->version}");
     }
 
     public function hookActionOrderSlipAdd($params)
@@ -646,7 +647,7 @@ class Kevin extends PaymentModule
                 $banks[] = [
                     'id' => 'card',
                     'title' => 'Credit/Debit card',
-                    'logo' => Context::getContext()->shop->getBaseURL(true).'modules/kevin/views/img/card.png',
+                    'logo' => 'https://cdn.kevin.eu/banks/images/VISA_MC.png',
                     'action' => $this->context->link->getModuleLink($this->name, 'redirect', ['id' => 'card'], true),
                 ];
             }
@@ -719,7 +720,7 @@ class Kevin extends PaymentModule
             $option = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
             $option->setModuleName($this->name);
             $option->setCallToActionText('Credit/Debit card');
-            $option->setLogo(Context::getContext()->shop->getBaseURL(true).'modules/kevin/views/img/card.png');
+            $option->setLogo('https://cdn.kevin.eu/banks/images/VISA_MC.png');
             $option->setAction($this->context->link->getModuleLink($this->name, 'redirect', ['id' => 'card'], true));
             $options[] = $option;
         }

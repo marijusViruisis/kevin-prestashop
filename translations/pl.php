@@ -1,13 +1,12 @@
 <?php
 
 global $_MODULE;
-$_MODULE = [];
+$_MODULE = array();
 $_MODULE['<{kevin}prestashop>kevin_07e71f9ec967d243b32af9407ffd94cd'] = 'kevin.';
 $_MODULE['<{kevin}prestashop>kevin_203185b0731f949941e33ff1b4fac068'] = 'kevin. to firma dostarczająca infrastrukturę płatniczą do inicjowania płatności (PIS - payment initiation service) w regionie UE i EOG';
 $_MODULE['<{kevin}prestashop>kevin_35978e9d51ed26fa7bfa472de4a9da04'] = 'Czy na pewno chcesz odinstalować?';
 $_MODULE['<{kevin}prestashop>kevin_e9e92bc3e4fff3f7875480cf268cfeb2'] = 'Identyfikator klienta i hasło-sekret muszą być skonfigurowane przed rozpoczęciem korzystania z tego modułu.';
 $_MODULE['<{kevin}prestashop>kevin_2f0d02bb8a41eda00e9c88afcf921a41'] = 'Nazwa firmy i numer konta bankowego muszą być skonfigurowane przed rozpoczęciem korzystania z tego modułu.';
-$_MODULE['<{kevin}prestashop>kevin_cdbe2f170711683cb6624cf9c509cc99'] = 'Ten moduł jest niedostępny w Twoim kraju.';
 $_MODULE['<{kevin}prestashop>kevin_d85c4d6fd5b26c919beca062b24369a5'] = 'Dane klienta. ';
 $_MODULE['<{kevin}prestashop>kevin_76525f0f34b48475e5ca33f71d296f3b'] = 'Client ID';
 $_MODULE['<{kevin}prestashop>kevin_734082edf44417dd19cc65943aa65c36'] = 'Client Secret';
@@ -41,9 +40,10 @@ $_MODULE['<{kevin}prestashop>redirect_902b0d55fddef6f8d651fe1035b7d4bd'] = 'Bł�
 $_MODULE['<{kevin}prestashop>configure_07e71f9ec967d243b32af9407ffd94cd'] = 'kevin.';
 $_MODULE['<{kevin}prestashop>configure_15bbb9d0bbf25e8d2978de1168c749dc'] = 'Strona internetowa.';
 $_MODULE['<{kevin}prestashop>configure_db5eb84117d06047c97c9a0191b5fffe'] = 'Pomoc.';
-$_MODULE['<{kevin}prestashop>admin_order_content_ship_84d9c3eb89d21b3bc7ab5d5e8666c66b'] = 'Informacje o płatnościach kevin.';
+$_MODULE['<{kevin}prestashop>error_4e37eee382169d81a8613302503e7bc2'] = 'Powrót do koszyka';
+$_MODULE['<{kevin}prestashop>admin_order_content_ship_ffcc71f7e5e6a376ee5efb345f64a40c'] = 'Informacje o płatności kevin.';
 $_MODULE['<{kevin}prestashop>admin_order_content_ship_707d99218561f0ab106d1c5584cf0f88'] = 'Identyfikator zamówienia.';
-$_MODULE['<{kevin}prestashop>admin_order_tab_ship_f1cd318e412b5f7226e5f377a9544ff7'] = 'kevin.';
+$_MODULE['<{kevin}prestashop>admin_order_tab_ship_07e71f9ec967d243b32af9407ffd94cd'] = 'kevin.';
 $_MODULE['<{kevin}prestashop>order-confirmation_7f21696f11929f5ed55ca5bcb15d2fc1'] = 'Twoje zamówienie zostało potwierdzone.';
 $_MODULE['<{kevin}prestashop>order-confirmation_e19e31ddb54b493059808ec4f2dab4cb'] = 'Twój numer zamówienia:';
 $_MODULE['<{kevin}prestashop>order-confirmation_787027739dfe9128a01a57edbbc6f077'] = 'Wiadomość została wysłana na Twój adres e-mail.';

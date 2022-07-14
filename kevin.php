@@ -699,9 +699,6 @@ class Kevin extends PaymentModule
         }
         $options = [];
         $bank_data = $this->getBanks();
-        if (!$bank_data) {
-            return [];
-        }
 
         $kevinAuth = $this->getClient()->auth();
         $paymentMethods = $kevinAuth->getPaymentMethods();

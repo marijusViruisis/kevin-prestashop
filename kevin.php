@@ -629,9 +629,7 @@ class Kevin extends PaymentModule
         $banks = [];
 
         $bank_data = $this->getBanks();
-        if (!$bank_data) {
-            return [];
-        }
+
         $kevinAuth = $this->getClient()->auth();
         $paymentMethods = $kevinAuth->getPaymentMethods();
         if (in_array('bank', $paymentMethods['data'])) {

@@ -644,7 +644,7 @@ class Kevin extends PaymentModule
             if (in_array('card', $paymentMethods['data'])) {
                 $banks[] = [
                     'id' => 'card',
-                    'title' => 'Credit/Debit card',
+                    'title' => $this->l('Credit/Debit card'),
                     'logo' => 'https://cdn.kevin.eu/banks/images/VISA_MC.png',
                     'action' => $this->context->link->getModuleLink($this->name, 'redirect', ['id' => 'card'], true),
                 ];

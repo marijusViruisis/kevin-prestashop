@@ -46,7 +46,7 @@ class Kevin extends PaymentModule
     {
         $this->name = 'kevin';
         $this->tab = 'payments_gateways';
-        $this->version = '1.9.4';
+        $this->version = '1.9.5';
         $this->ps_versions_compliancy = ['min' => '1.6', 'max' => _PS_VERSION_];
         $this->author = 'kevin.';
         $this->controllers = ['redirect', 'confirm', 'webhook'];
@@ -629,9 +629,7 @@ class Kevin extends PaymentModule
         $banks = [];
 
         $bank_data = $this->getBanks();
-        if (!$bank_data) {
-            return [];
-        }
+
         $kevinAuth = $this->getClient()->auth();
         $paymentMethods = $kevinAuth->getPaymentMethods();
         if (in_array('bank', $paymentMethods['data'])) {
@@ -699,9 +697,6 @@ class Kevin extends PaymentModule
         }
         $options = [];
         $bank_data = $this->getBanks();
-        if (!$bank_data) {
-            return [];
-        }
 
         $kevinAuth = $this->getClient()->auth();
         $paymentMethods = $kevinAuth->getPaymentMethods();

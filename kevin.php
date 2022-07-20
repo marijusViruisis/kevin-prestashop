@@ -46,7 +46,7 @@ class Kevin extends PaymentModule
     {
         $this->name = 'kevin';
         $this->tab = 'payments_gateways';
-        $this->version = '1.9.5';
+        $this->version = '1.9.6';
         $this->ps_versions_compliancy = ['min' => '1.6', 'max' => _PS_VERSION_];
         $this->author = 'kevin.';
         $this->controllers = ['redirect', 'confirm', 'webhook'];
@@ -115,7 +115,7 @@ class Kevin extends PaymentModule
             $this->registerHook('displayAdminOrderTabShip') &&
             $this->registerHook('displayAdminOrderTabLink') &&
             $this->registerHook('displayAdminOrderTabContent') &&
-            $this->registerHook('hookActionOrderSlipAdd') &&
+            $this->registerHook('actionOrderSlipAdd') &&
             $this->registerHook('displayOrderConfirmation');
     }
 
@@ -149,7 +149,7 @@ class Kevin extends PaymentModule
             $this->unregisterHook('orderConfirmation') &&
             $this->unregisterHook('paymentOptions') &&
             $this->unregisterHook('displayOrderConfirmation') &&
-            $this->unregisterHook('hookActionOrderSlipAdd');
+            $this->unregisterHook('actionOrderSlipAdd');
     }
 
     public function reset()

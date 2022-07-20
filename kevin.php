@@ -115,7 +115,7 @@ class Kevin extends PaymentModule
             $this->registerHook('displayAdminOrderTabShip') &&
             $this->registerHook('displayAdminOrderTabLink') &&
             $this->registerHook('displayAdminOrderTabContent') &&
-            $this->registerHook('hookActionOrderSlipAdd') &&
+            $this->registerHook('actionOrderSlipAdd') &&
             $this->registerHook('displayOrderConfirmation');
     }
 
@@ -149,7 +149,7 @@ class Kevin extends PaymentModule
             $this->unregisterHook('orderConfirmation') &&
             $this->unregisterHook('paymentOptions') &&
             $this->unregisterHook('displayOrderConfirmation') &&
-            $this->unregisterHook('hookActionOrderSlipAdd');
+            $this->unregisterHook('actionOrderSlipAdd');
     }
 
     public function reset()

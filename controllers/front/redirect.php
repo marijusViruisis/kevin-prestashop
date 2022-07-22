@@ -42,7 +42,7 @@ class KevinRedirectModuleFrontController extends ModuleFrontController
             Tools::redirect('index.php?controller=order&step=1');
         }
 
-        $cart_id = (int) ($cart->id);
+        $cart_id = (int) $cart->id;
         $payment_status = Configuration::get('KEVIN_ORDER_STATUS_STARTED');
         $message = null;
         $currency_id = $cart->id_currency;

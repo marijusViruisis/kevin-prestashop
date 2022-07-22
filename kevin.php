@@ -176,7 +176,7 @@ class Kevin extends PaymentModule
         $is_submit = false;
         $buttons = ['submitKevinModule1', 'submitKevinModule2', 'submitKevinModule3'];
         foreach ($buttons as $button) {
-            if (((bool) (Tools::isSubmit($button))) === true) {
+            if (((bool) Tools::isSubmit($button)) === true) {
                 $is_submit = true;
                 break;
             }
@@ -529,7 +529,7 @@ class Kevin extends PaymentModule
                     $paymentId = $row['payment_id'];
                     $amount = number_format($amount, 2);
                     if (!$paymentId) {
-                        exit();
+                        exit;
                     }
                     $kevinPayment = $this->getClient()->payment();
                     $webhook_url = $this->context->link->getModuleLink('kevin', 'webhook', [], true);

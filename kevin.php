@@ -46,7 +46,7 @@ class Kevin extends PaymentModule
     {
         $this->name = 'kevin';
         $this->tab = 'payments_gateways';
-        $this->version = '1.9.5';
+        $this->version = '1.10.0';
         $this->ps_versions_compliancy = ['min' => '1.6', 'max' => _PS_VERSION_];
         $this->author = 'kevin.';
         $this->controllers = ['redirect', 'confirm', 'webhook'];
@@ -176,7 +176,7 @@ class Kevin extends PaymentModule
         $is_submit = false;
         $buttons = ['submitKevinModule1', 'submitKevinModule2', 'submitKevinModule3'];
         foreach ($buttons as $button) {
-            if (((bool) (Tools::isSubmit($button))) === true) {
+            if (((bool) Tools::isSubmit($button)) === true) {
                 $is_submit = true;
                 break;
             }
@@ -529,7 +529,7 @@ class Kevin extends PaymentModule
                     $paymentId = $row['payment_id'];
                     $amount = number_format($amount, 2);
                     if (!$paymentId) {
-                        exit();
+                        exit;
                     }
                     $kevinPayment = $this->getClient()->payment();
                     $webhook_url = $this->context->link->getModuleLink('kevin', 'webhook', [], true);
@@ -644,7 +644,7 @@ class Kevin extends PaymentModule
             if (in_array('card', $paymentMethods['data'])) {
                 $banks[] = [
                     'id' => 'card',
-                    'title' => 'Credit/Debit card',
+                    'title' => $this->l('Credit/Debit card'),
                     'logo' => 'https://cdn.kevin.eu/banks/images/VISA_MC.png',
                     'action' => $this->context->link->getModuleLink($this->name, 'redirect', ['id' => 'card'], true),
                 ];
@@ -714,7 +714,7 @@ class Kevin extends PaymentModule
         if (in_array('card', $paymentMethods['data'])) {
             $option = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
             $option->setModuleName($this->name);
-            $option->setCallToActionText('Credit/Debit card');
+            $option->setCallToActionText($this->l('Credit/Debit card'));
             $option->setLogo('https://cdn.kevin.eu/banks/images/VISA_MC.png');
             $option->setAction($this->context->link->getModuleLink($this->name, 'redirect', ['id' => 'card'], true));
             $options[] = $option;

@@ -714,7 +714,7 @@ class Kevin extends PaymentModule
         if (in_array('card', $paymentMethods['data'])) {
             $option = new PrestaShop\PrestaShop\Core\Payment\PaymentOption();
             $option->setModuleName($this->name);
-            $option->setCallToActionText('Credit/Debit card');
+            $option->setCallToActionText($this->l('Credit/Debit card'));
             $option->setLogo('https://cdn.kevin.eu/banks/images/VISA_MC.png');
             $option->setAction($this->context->link->getModuleLink($this->name, 'redirect', ['id' => 'card'], true));
             $options[] = $option;

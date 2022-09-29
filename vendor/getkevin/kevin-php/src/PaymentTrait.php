@@ -4,8 +4,6 @@ namespace Kevin;
 
 /**
  * Trait providing helper methods used for payments.
- *
- * @package Kevin
  */
 trait PaymentTrait
 {
@@ -15,6 +13,7 @@ trait PaymentTrait
      * Extract query attributes used for payment action.
      *
      * @param array $attr
+     *
      * @return array
      */
     private function getPaymentQueryAttr($attr = [])
@@ -22,15 +21,15 @@ trait PaymentTrait
         $data = [];
 
         if (isset($attr['bankId'])) {
-            $data['bankId'] = strval($attr['bankId']);
+            $data['bankId'] = (string) $attr['bankId'];
         }
 
         if (isset($attr['redirectPreferred'])) {
-            $data['redirectPreferred'] = boolval(filter_var($attr['redirectPreferred'], FILTER_VALIDATE_BOOLEAN)) ? 'true' : 'false';
+            $data['redirectPreferred'] = (bool) (filter_var($attr['redirectPreferred'], \FILTER_VALIDATE_BOOLEAN)) ? 'true' : 'false';
         }
 
         if (isset($attr['paymentMethodPreferred'])) {
-            $data['paymentMethodPreferred'] = strval($attr['paymentMethodPreferred']);
+            $data['paymentMethodPreferred'] = (string) $attr['paymentMethodPreferred'];
         }
 
         return $data;
@@ -40,6 +39,7 @@ trait PaymentTrait
      * Extract body attributes used for payment action.
      *
      * @param array $attr
+     *
      * @return array
      */
     private function getInitPaymentBodyAttr($attr)
@@ -50,21 +50,33 @@ trait PaymentTrait
                 'iban' => '',
                 'bban' => '',
                 'sortCodeAccountNumber' => '',
+                'currencyCode' => '',
             ],
             'debtorAccount' => [
                 'iban' => '',
                 'bban' => '',
                 'sortCodeAccountNumber' => '',
+                'currencyCode' => '',
             ],
             'bankPaymentMethod' => [
                 'creditorName' => '',
                 'endToEndId' => '',
                 'informationStructured' => [
                     'reference' => '',
+                    'referenceType' => '',
                 ],
                 'creditorAccount' => [
                     'iban' => '',
-                ]
+                    'bban' => '',
+                    'sortCodeAccountNumber' => '',
+                    'currencyCode' => '',
+                ],
+                'debtorAccount' => [
+                    'iban' => '',
+                    'bban' => '',
+                    'sortCodeAccountNumber' => '',
+                    'currencyCode' => '',
+                ],
             ],
             'cardPaymentMethod' => [
                 'cvc' => '',
@@ -85,7 +97,7 @@ trait PaymentTrait
             'requestedExecutionDate' => '',
             'identifier' => [
                 'email' => '',
-            ]
+            ],
         ];
 
         return $this->processSchemaAttributes($schema, $attr);
@@ -95,6 +107,7 @@ trait PaymentTrait
      * Extract body attributes used for init payment refund action.
      *
      * @param array $attr
+     *
      * @return array
      */
     private function getInitPaymentRefundAttr($attr)
@@ -110,6 +123,7 @@ trait PaymentTrait
      * Extract header attributes used for payment action.
      *
      * @param array $attr
+     *
      * @return array
      */
     private function getInitPaymentHeaderAttr($attr = [])
@@ -119,16 +133,16 @@ trait PaymentTrait
         if (isset($attr['Authorization'])) {
             $data = array_merge(
                 $data,
-                ['Authorization: ' . $this->unifyBearerToken($attr['Authorization'])]
+                ['Authorization: '.$this->unifyBearerToken($attr['Authorization'])]
             );
         }
 
         if (isset($attr['Redirect-URL'])) {
-            $data[] = 'Redirect-URL: ' . $attr['Redirect-URL'];
+            $data[] = 'Redirect-URL: '.$attr['Redirect-URL'];
         }
 
         if (isset($attr['Webhook-URL'])) {
-            $data[] = 'Webhook-URL: ' . $attr['Webhook-URL'];
+            $data[] = 'Webhook-URL: '.$attr['Webhook-URL'];
         }
 
         return $data;
@@ -138,25 +152,25 @@ trait PaymentTrait
      * Extract header attributes used for payment data action.
      *
      * @param array $attr
+     *
      * @return array
      */
     private function getPaymentHeaderAttr($attr = [])
     {
         $data = $this->buildHeader();
 
-        if (isset($attr['PSU-IP-Address'])) {
-            $data[] = 'PSU-IP-Address: ' . $attr['PSU-IP-Address'];
-        }
-
-        if (in_array($this->getOption('version'), ['0.2', '0.3'])) {
+        if ($this->getOption('version') === '0.2') {
+            if (isset($attr['PSU-IP-Address'])) {
+                $data[] = 'PSU-IP-Address: '.$attr['PSU-IP-Address'];
+            }
             if (isset($attr['PSU-IP-Port'])) {
-                $data[] = 'PSU-IP-Port: ' . $attr['PSU-IP-Port'];
+                $data[] = 'PSU-IP-Port: '.$attr['PSU-IP-Port'];
             }
             if (isset($attr['PSU-User-Agent'])) {
-                $data[] = 'PSU-User-Agent: ' . $attr['PSU-User-Agent'];
+                $data[] = 'PSU-User-Agent: '.$attr['PSU-User-Agent'];
             }
             if (isset($attr['PSU-Device-ID'])) {
-                $data[] = 'PSU-Device-ID: ' . $attr['PSU-Device-ID'];
+                $data[] = 'PSU-Device-ID: '.$attr['PSU-Device-ID'];
             }
         }
 
@@ -167,25 +181,25 @@ trait PaymentTrait
      * Extract header attributes used for payment status action.
      *
      * @param array $attr
+     *
      * @return array
      */
     private function getPaymentStatusHeaderAttr($attr = [])
     {
         $data = $this->buildHeader();
 
-        if (isset($attr['PSU-IP-Address'])) {
-            $data[] = 'PSU-IP-Address: ' . $attr['PSU-IP-Address'];
-        }
-
-        if (in_array($this->getOption('version'), ['0.2', '0.3'])) {
+        if ($this->getOption('version') === '0.2') {
+            if (isset($attr['PSU-IP-Address'])) {
+                $data[] = 'PSU-IP-Address: '.$attr['PSU-IP-Address'];
+            }
             if (isset($attr['PSU-User-Agent'])) {
-                $data[] = 'PSU-User-Agent: ' . $attr['PSU-User-Agent'];
+                $data[] = 'PSU-User-Agent: '.$attr['PSU-User-Agent'];
             }
             if (isset($attr['PSU-IP-Port'])) {
-                $data[] = 'PSU-IP-Port: ' . $attr['PSU-IP-Port'];
+                $data[] = 'PSU-IP-Port: '.$attr['PSU-IP-Port'];
             }
             if (isset($attr['PSU-Device-ID'])) {
-                $data[] = 'PSU-Device-ID: ' . $attr['PSU-Device-ID'];
+                $data[] = 'PSU-Device-ID: '.$attr['PSU-Device-ID'];
             }
         }
 
@@ -196,6 +210,7 @@ trait PaymentTrait
      * Extract header attributes used for init payment refund action.
      *
      * @param array $attr
+     *
      * @return array
      */
     private function getInitiatePaymentRefundHeaderAttr($attr = [])
@@ -203,7 +218,7 @@ trait PaymentTrait
         $data = $this->buildHeader();
 
         if (isset($attr['Webhook-URL'])) {
-            $data[] = 'Webhook-URL: ' . $attr['Webhook-URL'];
+            $data[] = 'Webhook-URL: '.$attr['Webhook-URL'];
         }
 
         return $data;

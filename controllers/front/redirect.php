@@ -81,7 +81,7 @@ class KevinRedirectModuleFrontController extends ModuleFrontController
             'identifier' => ['email' => $customer->email],
             'redirectPreferred' => (bool) $redirect_preferred,
             'Redirect-URL' => $this->context->link->getModuleLink('kevin', 'confirm', [], true),
-            'Webhook-URL' => $this->context->link->getModuleLink('kevin', 'webhook', [], true),
+            'Webhook-URL' => $this->module->getContextUrl('kevin', 'webhook', [], true),
         ];
 
         $attr['bankPaymentMethod'] = [

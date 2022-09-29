@@ -4,25 +4,28 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "33c79f1e8db05af5b75313337fb63090",
+    "content-hash": "244905c3f28c87b068522f58518ae56d",
     "packages": [
         {
             "name": "getkevin/kevin-php",
-            "version": "0.15.1",
+            "version": "0.17.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/getkevin/kevin-php.git",
-                "reference": "d50be1bd58a5ecd14a7f7b7453d681d372403ce0"
+                "reference": "44dfcc7fc5d64b7e578431ef9bb94db9349fff7b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/getkevin/kevin-php/zipball/d50be1bd58a5ecd14a7f7b7453d681d372403ce0",
-                "reference": "d50be1bd58a5ecd14a7f7b7453d681d372403ce0",
+                "url": "https://api.github.com/repos/getkevin/kevin-php/zipball/44dfcc7fc5d64b7e578431ef9bb94db9349fff7b",
+                "reference": "44dfcc7fc5d64b7e578431ef9bb94db9349fff7b",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
                 "php": ">=5.6"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2.19"
             },
             "type": "library",
             "autoload": {
@@ -41,12 +44,7 @@
                 }
             ],
             "description": "PHP client for kevin. platform.",
-            "support": {
-                "email": "help@kevin.eu",
-                "issues": "https://github.com/getkevin/kevin-php/issues",
-                "source": "https://github.com/getkevin/kevin-php/tree/0.15.1"
-            },
-            "time": "2021-12-01T09:15:52+00:00"
+            "time": "2022-09-15T08:23:52+00:00"
         }
     ],
     "packages-dev": [

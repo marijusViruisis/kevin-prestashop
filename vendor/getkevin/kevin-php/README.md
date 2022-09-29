@@ -12,13 +12,13 @@
 
 1. To install latest kevin. PHP Client repository using composer:
 
-```
+```sh
 composer require getkevin/kevin-php
 ```
 
 2. Using Composer autoloader, include kevin. PHP Client:
 
-```
+```php
 require('vendor/autoload.php');
 ```
 
@@ -35,7 +35,7 @@ require('vendor/autoload.php');
 
 ### Initialization
 
-```
+```php
 use Kevin\Client;
 
 $clientId = 'my-client-id';
@@ -54,38 +54,40 @@ $kevinClient = new Client($clientId, $clientSecret, $options);
 > - `error` - Defines return type of error data. Possible values are: `array` - returns an array on error, `exception` - throws an exception on error, default value is `exception`.
 >
 > - `version` - Selects API versions to use. Default value is `0.3`. Possible values are `0.1`, `0.2` or `0.3`.
+>
+> - `lang` - a two-letter lowercase language code defined in ISO 639-1 standart. Sets the language of the frame page.
 
 ### 1. Authentication
 
 ### 1.1 Get supported countries
 
-```
+```php
 $response = $kevinClient->auth()->getCountries();
 ```
 
 ### 1.2 Get supported banks
 
-```
+```php
 $attr = ['countryCode' => 'LT'];
 $response = $kevinClient->auth()->getBanks($attr);
 ```
 
 ### 1.3 Get supported bank
 
-```
+```php
 $bankId = 'SEB_LT_SAND';
 $response = $kevinClient->auth()->getBank($bankId);
 ```
 
 ### 1.4 Get project settings
 
-```
+```php
 $response = $kevinClient->auth()->getProjectSettings();
 ```
 
 ### 1.5 Start authentication
 
-```
+```php
 $attr = [
     'redirectPreferred' => 'false',
     'scopes' => 'payments,accounts_basic',
@@ -97,7 +99,7 @@ $response = $kevinClient->auth()->authenticate($attr);
 
 ### 1.6 Receive token
 
-```
+```php
 $attr = ['code' => 'your-auth-code'];
 // ...or $attr = 'your-auth-code';
 $response = $kevinClient->auth()->receiveToken($attr);
@@ -105,7 +107,7 @@ $response = $kevinClient->auth()->receiveToken($attr);
 
 ### 1.7 Refresh token
 
-```
+```php
 $attr = ['refreshToken' => 'your-refresh-token'];
 // ...or $attr = 'your-refresh-token';
 $response = $kevinClient->auth()->refreshToken($attr);
@@ -113,7 +115,7 @@ $response = $kevinClient->auth()->refreshToken($attr);
 
 ### 1.8 Receive token content
 
-```
+```php
 $attr = ['Authorization' => 'your-bearer-token'];
 // ...or $attr = 'your-bearer-token';
 // ...or $attr = 'Bearer your-bearer-token';
@@ -126,7 +128,7 @@ $response = $kevinClient->auth()->receiveTokenContent($attr);
 
 :exclamation: _Take a note that the example below is for the v0.3 only. The v0.1 and v0.2 requires a slightly different body._
 
-```
+```php
 $attr = [
     'Redirect-URL' => 'https://redirect.kevin.eu/payment.html',
     'description' => 'Test',
@@ -145,26 +147,28 @@ $response = $kevinClient->payment()->initPayment($attr);
 
 ### 2.2 Initiate card payment
 
-```
+```php
 $attr = [
     'Redirect-URL' => 'https://redirect.kevin.eu/payment.html',
     'description' => 'Test',
     'currencyCode' => 'EUR',
     'amount' => '0.01',
-    'cardPaymentMethod' => [
-        'cvc' => '123',
-        'expMonth' => '01',
-        'expYear' => '2036',
-        'number' => '5555555555555555',
-        'holderName' => 'John Titor',
+    'bankPaymentMethod' => [
+        'endToEndId' => '1',
+        'creditorName' => 'John Smith',
+        'creditorAccount' => [
+            'iban' => 'LT144010051005081586',
+        ],
     ],
+    'cardPaymentMethod' => [],
+    'paymentMethodPreferred' => 'card',
 ];
 $response = $kevinClient->payment()->initPayment($attr);
 ```
 
 ### 2.3 Initiate hybrid payment
 
-```
+```php
 $attr = [
     'Redirect-URL' => 'https://redirect.kevin.eu/payment.html',
     'description' => 'Test',
@@ -184,21 +188,21 @@ $response = $kevinClient->payment()->initPayment($attr);
 
 ### 2.4 Get payment
 
-```
+```php
 $paymentId = 'your-payment-id';
 $response = $kevinClient->payment()->getPayment($paymentId);
 ```
 
 ### 2.5 Get payment status
 
-```
+```php
 $paymentId = 'your-payment-id';
 $response = $kevinClient->payment()->getPaymentStatus($paymentId);
 ```
 
 ### 2.6 Initiate payment refund
 
-```
+```php
 $paymentId = 'your-payment-id';
 $attr = [
     'amount' => '1.00',
@@ -209,7 +213,7 @@ $response = $kevinClient->payment()->initiatePaymentRefund($paymentId, $attr);
 
 ### 2.7 Get payment refunds
 
-```
+```php
 $paymentId = 'your-payment-id';
 $response = $kevinClient->payment()->getPaymentRefunds($paymentId);
 ```
@@ -220,7 +224,7 @@ $response = $kevinClient->payment()->getPaymentRefunds($paymentId);
 
 :exclamation: _Take a note that the example below is for the v0.3 only. The v0.1 and v0.2 requires a slightly different body._
 
-```
+```php
 $accessToken = 'your-bearer-token';
 $attr = [
     'Authorization' => $accessToken,
@@ -235,7 +239,7 @@ $response = $kevinClient->account()->getAccountList($attr);
 
 ### 3.2 Get account details
 
-```
+```php
 $accountId = 'your-account-id';
 $accessToken = 'your-bearer-token';
 $attr = [
@@ -251,7 +255,7 @@ $response = $kevinClient->account()->getAccountDetails($accountId, $attr);
 
 ### 3.3 Get account transactions
 
-```
+```php
 $accountId = 'your-account-id';
 $accessToken = 'your-bearer-token';
 $attr = [
@@ -269,7 +273,7 @@ $response = $kevinClient->account()->getAccountTransactions($accountId, $attr);
 
 ### 3.4 Get account balance
 
-```
+```php
 $accountId = 'your-account-id';
 $accessToken = 'your-bearer-token';
 $attr = [
@@ -289,7 +293,7 @@ $response = $kevinClient->account()->getAccountBalance($accountId, $attr);
 
 :exclamation: _We recommend ignoring the webhook if the signature is older than 5 minutes._
 
-```
+```php
 use Kevin\SecurityManager;
 
 $endpointSecret = 'your-endpoint-secret';
@@ -303,6 +307,17 @@ $headers = getallheaders();
 
 $isValid = SecurityManager::verifySignature($endpointSecret, $requestBody, $headers, $webhookUrl, $timestampTimeout);
 ```
+
+## Contributing
+Before making any code changes, make sure to run `composer install` to install development requirements.
+
+We are using PHP CS Fixer GitHub action to conduct code style checks for each commit and pull request. Make sure to run `composer fix-style` before
+committing changes to make sure your code matches our style standards. Pull requests with failed style checks will not
+be approved.
+
+*WARNING*: we use risky rules so make sure to check for breaking style fixes.
+
+Style errors and violated rules log can be viewed by running `composer check-style` command.
 
 ## Support
 

@@ -46,7 +46,7 @@ class Kevin extends PaymentModule
     {
         $this->name = 'kevin';
         $this->tab = 'payments_gateways';
-        $this->version = '1.10.1';
+        $this->version = '1.10.2';
         $this->ps_versions_compliancy = ['min' => '1.6', 'max' => _PS_VERSION_];
         $this->author = 'kevin.';
         $this->controllers = ['redirect', 'confirm', 'webhook'];
@@ -430,23 +430,10 @@ class Kevin extends PaymentModule
 
     public function hookActionOrderSlipAdd($params)
     {
-        $this->hookBackOfficeHeader();
-    }
+        if (!Tools::getValue('id_order')) {
+            return;
+        }
 
-    /**
-     * Hook files for frontend.
-     */
-    public function hookBackOfficeHeader()
-    {
-        if (Tools::getValue('module_name') == $this->name) {
-            $this->context->controller->addCSS($this->_path.'views/css/back.css');
-        }
-        if (Tools::getValue('id_order')) {
-            $this->context->controller->addJquery();
-            Media::addJsDefL('kevin_text', $this->l('Get your money back through the kevin system'));
-            Media::addJsDefL('id_order', Tools::getValue('id_order'));
-            $this->context->controller->addJs($this->_path."views/js/back.js?v={$this->version}");
-        }
         $order = new Order(Tools::getValue('id_order'));
         if (Tools::isSubmit('partialRefund') && isset($order) && Tools::getValue('refundwithkevin')) {
             if (Tools::isSubmit('partialRefundProduct') && ($refunds = Tools::getValue('partialRefundProduct')) && is_array($refunds)) {
@@ -607,6 +594,23 @@ class Kevin extends PaymentModule
                     return true;
                 }
             }
+        }
+    }
+
+    /**
+     * Hook files for frontend.
+     */
+    public function hookBackOfficeHeader()
+    {
+        if (Tools::getValue('module_name') == $this->name) {
+            $this->context->controller->addCSS($this->_path.'views/css/back.css');
+        }
+
+        if (Tools::getValue('id_order')) {
+            $this->context->controller->addJquery();
+            Media::addJsDefL('kevin_text', $this->l('Get your money back through the kevin system'));
+            Media::addJsDefL('id_order', Tools::getValue('id_order'));
+            $this->context->controller->addJs($this->_path."views/js/back.js?v={$this->version}");
         }
     }
 

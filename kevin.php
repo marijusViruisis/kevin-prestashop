@@ -46,7 +46,7 @@ class Kevin extends PaymentModule
     {
         $this->name = 'kevin';
         $this->tab = 'payments_gateways';
-        $this->version = '1.10.2';
+        $this->version = '1.10.3';
         $this->ps_versions_compliancy = ['min' => '1.6', 'max' => _PS_VERSION_];
         $this->author = 'kevin.';
         $this->controllers = ['redirect', 'confirm', 'webhook'];
@@ -430,23 +430,10 @@ class Kevin extends PaymentModule
 
     public function hookActionOrderSlipAdd($params)
     {
-        $this->hookBackOfficeHeader();
-    }
+        if (!Tools::getValue('id_order')) {
+            return;
+        }
 
-    /**
-     * Hook files for frontend.
-     */
-    public function hookBackOfficeHeader()
-    {
-        if (Tools::getValue('module_name') == $this->name) {
-            $this->context->controller->addCSS($this->_path.'views/css/back.css');
-        }
-        if (Tools::getValue('id_order')) {
-            $this->context->controller->addJquery();
-            Media::addJsDefL('kevin_text', $this->l('Get your money back through the kevin system'));
-            Media::addJsDefL('id_order', Tools::getValue('id_order'));
-            $this->context->controller->addJs($this->_path."views/js/back.js?v={$this->version}");
-        }
         $order = new Order(Tools::getValue('id_order'));
         if (Tools::isSubmit('partialRefund') && isset($order) && Tools::getValue('refundwithkevin')) {
             if (Tools::isSubmit('partialRefundProduct') && ($refunds = Tools::getValue('partialRefundProduct')) && is_array($refunds)) {
@@ -532,7 +519,7 @@ class Kevin extends PaymentModule
                         exit;
                     }
                     $kevinPayment = $this->getClient()->payment();
-                    $webhook_url = $this->context->link->getModuleLink('kevin', 'webhook', [], true);
+                    $webhook_url = $this->getContextUrl('kevin', 'webhook', [], true);
                     $attr = [
                         'amount' => $amount,
                         'Webhook-URL' => $webhook_url,
@@ -607,6 +594,23 @@ class Kevin extends PaymentModule
                     return true;
                 }
             }
+        }
+    }
+
+    /**
+     * Hook files for frontend.
+     */
+    public function hookBackOfficeHeader()
+    {
+        if (Tools::getValue('module_name') == $this->name) {
+            $this->context->controller->addCSS($this->_path.'views/css/back.css');
+        }
+
+        if (Tools::getValue('id_order')) {
+            $this->context->controller->addJquery();
+            Media::addJsDefL('kevin_text', $this->l('Get your money back through the kevin system'));
+            Media::addJsDefL('id_order', Tools::getValue('id_order'));
+            $this->context->controller->addJs($this->_path."views/js/back.js?v={$this->version}");
         }
     }
 
@@ -737,6 +741,10 @@ class Kevin extends PaymentModule
             'version' => '0.3',
         ];
         $options = array_merge($options, $this->getSystemData());
+
+        if (API_KEVIN_DOMAIN) {
+            $options['domain'] = API_KEVIN_DOMAIN;
+        }
 
         return new \Kevin\Client($this->clientId, $this->clientSecret, $options);
     }
@@ -989,5 +997,23 @@ class Kevin extends PaymentModule
                 return $this->display(__FILE__, 'views/templates/hook/admin_order_content_ship.tpl');
             }
         }
+    }
+
+    /**
+     * @param string    $module
+     * @param string    $controller
+     * @param bool|null $ssl
+     *
+     * @return string
+     */
+    public function getContextUrl($module, $controller, array $params = [], $ssl = null)
+    {
+        $link = $this->context->link->getModuleLink($module, $controller, $params, true);
+
+        if (CUSTOM_WEBHOOK_URL) {
+            $link = str_replace($this->context->link->getBaseLink(), CUSTOM_WEBHOOK_URL, $link);
+        }
+
+        return $link;
     }
 }

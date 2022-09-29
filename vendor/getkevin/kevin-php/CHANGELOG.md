@@ -1,6 +1,27 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.17.0] - 2022-09-15
+- Add `scheme` and `port` keys to the options array property
+
+## [0.16.2] - 2022-05-02
+- Update payment initiation schema
+- Remove headers from the `getPayment` and `getPaymentStatus` endpoint on v0.3 version
+
+## [0.16.1] - 2022-04-19
+- Remove language validation
+
+## [0.16.0] - 2022-03-29
+- Remove get bank by card number endpoint implementation
+- Fix typo in api domain reference
+
+## [0.15.3] - 2022-03-29
+- Fix style using PHP CS Fixer
+- Add PHP CS Fixer GitHub action to verify commits
+
+## [0.15.2] - 2022-03-25
+- Fix card linking
+
 ## [0.15.1] - 2021-11-29
 - Support for `Webhook-URL` header on authentication
 - New `domain` option to switch between environments easily.

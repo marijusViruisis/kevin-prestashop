@@ -47,7 +47,7 @@ class KevinWebhookModuleFrontController extends ModuleFrontController
 
         $webhookUrl = $this->module->getContextUrl('kevin', 'webhook', [], true);
         if (!\Kevin\SecurityManager::verifySignature(Configuration::get('KEVIN_ENDPOINT_SECRET'), $request_body, getallheaders(), $webhookUrl, 300000)) {
-            status_header(400);
+            http_response_code(400);
             exit('Signatures do not match.');
         }
 

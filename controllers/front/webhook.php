@@ -67,14 +67,20 @@ class KevinWebhookModuleFrontController extends ModuleFrontController
         if ($row = Db::getInstance()->getRow($sql)) {
             try {
                 $order = new Order($row['id_order']);
+
                 if (isset($request_array['paymentId']) && $request_array['paymentId'] && isset($request_array['type']) && $request_array['type'] == 'PAYMENT_REFUND' && isset($request_array['statusGroup']) && $request_array['statusGroup']) {
                     $sql = 'SELECT id_order_state FROM '._DB_PREFIX_.'order_history WHERE id_order_state = '.(int) Configuration::get('PS_OS_REFUND').' AND id_order = '.(int) $order->id;
                     $isExistAccepted = Db::getInstance()->getValue($sql);
                     if (!$isExistAccepted) { // if already refunded
-                        $new_history = new OrderHistory();
-                        $new_history->id_order = (int) $order->id;
-                        $new_history->changeIdOrderState((int) Configuration::get('PS_OS_REFUND'), $order, true);
-                        $new_history->addWithemail();
+                        $sql = 'SELECT SUM(product_quantity) - SUM(product_quantity_refunded) FROM '._DB_PREFIX_.'order_detail WHERE id_order = '.(int) $order->id;
+                        $allItemsRefunded = Db::getInstance()->getValue($sql);
+
+                        if ($allItemsRefunded == 0) {
+                            $new_history = new OrderHistory();
+                            $new_history->id_order = (int) $order->id;
+                            $new_history->changeIdOrderState((int) Configuration::get('PS_OS_REFUND'), $order, true);
+                            $new_history->addWithemail();
+                        }
                     }
                 } else {
                     $response = $request_array;
